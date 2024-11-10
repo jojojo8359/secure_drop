@@ -6,8 +6,17 @@ from contacts import users_file
 # to be registered - just create the file now
 def register_user():
     print("")
-    name: str = input("Enter Full Name: ").strip()
-    email: str = input("Enter Email Address: ").strip()
+    while True:
+        name: str = input("Enter Full Name: ").strip()
+        if name != "":
+            break
+        print("Please enter a name.")
+    while True:
+        email: str = input("Enter Email Address: ").strip()
+        if email != "":
+            break
+        print("Please enter an email.")
+
     password1: str = "a"
     password2: str = "b"
     while password1 != password2 or password1 == "":
@@ -15,8 +24,8 @@ def register_user():
         password2 = getpass("Re-enter Password: ")
         if password1 != password2:
             print("Passwords don't match, try again.")
-        if password1 == "":
-            print("Please enter a password, try again.")
+        elif password1 == "":
+            print("Please enter a password.")
     print("\nPasswords match.")
     user_obj: dict[str, str] = {"name": name, "email": email,
                                 "password": password1}
