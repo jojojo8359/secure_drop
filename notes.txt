@@ -1,0 +1,11 @@
+Users:
+Name, email, password
+
+Protections from password-cracking attacks:
+- password requirements???
+- secure hash (how to store?)
+
+Contacts:
+For each user:
+json file - named from some hash of name/email
+

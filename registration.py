@@ -1,9 +1,6 @@
 import json
-import os
-import sys
 from getpass import getpass
-
-users_file: str = "users.json"
+from contacts import users_file
 
 # Right now, it is assumed that the users file does not exist if a user is going
 # to be registered - just create the file now
@@ -40,23 +37,3 @@ def login():
                     break
         if not signed_in:
             print("Couldn't sign in, try again.")
-
-if __name__ == "__main__":
-    if not os.path.exists(users_file):
-        # ask if the user wants to register a new user
-        print("No users are registered with this client.")
-        confirmation: str = ""
-        while confirmation != "y" and confirmation != "n":
-            confirmation = input("Do you want to register a new user (y/n)? "
-                                 ).strip().lower()
-        if confirmation == "y":
-            register_user()
-        elif confirmation == "n":
-            # quit program
-            print("Goodbye!")
-            sys.exit(0)
-        else:
-            print("You shouldn't be here - goodbye!")
-            sys.exit(1)
-    else:
-        login()
