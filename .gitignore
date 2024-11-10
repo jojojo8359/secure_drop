@@ -2,4 +2,5 @@
 project.pdf
 .vscode
 users.json
+contacts
 __pycache__

@@ -1,9 +1,7 @@
 import json
 from getpass import getpass
 from contacts import users_file
-import Crypto.Random
-from Crypto.Hash import SHA512
-from Crypto.Hash import SHA3_256
+from hash import *
 
 # Right now, it is assumed that the users file does not exist if a user is going
 # to be registered - just create the file now
@@ -31,20 +29,16 @@ def register_user():
             print("Please enter a password.")
     print("\nPasswords match.")
     # Perform password encryption with salting
-    salt = Crypto.Random.get_random_bytes(32)
-    pass_hash = SHA512.new(truncate="256")
-    pass_hash.update(bytearray(password1, "utf-8"))
-    pass_hash.update(salt)
-    id_hash = SHA3_256.new()
-    id_hash.update(bytearray(email, "utf-8"))
-    user_obj: dict[str, str] = {"name": name, "id": id_hash.hexdigest(),
-                                "password": pass_hash.hexdigest(), "salt": salt.hex()}
+    salt = get_salt()
+    user_obj: dict[str, str] = {"name": name, "id": id_hash(email),
+                                "password": pass_salt_and_hash(password1, salt),
+                                "salt": salt.hex()}
     # Write output to user JSON file
     with open(users_file, 'w') as f:
         json.dump([user_obj], f)
     print("User registered.")
 
-def login():
+def login() -> str:
     signed_in: bool = False
     while not signed_in:
         email: str = input("Enter Email Address: ").strip()
@@ -52,16 +46,16 @@ def login():
         with open(users_file, 'r') as f:
             users = json.load(f)
             for user in users:
-                id_hash = SHA3_256.new()
-                id_hash.update(bytearray(email, "utf-8"))
-                if id_hash.hexdigest() == user["id"]:
-                    pass_hash = SHA512.new(truncate="256")
-                    pass_hash.update(bytearray(password, "utf-8"))
-                    pass_hash.update(bytes.fromhex(user["salt"]))
-                    if user["password"] == pass_hash.hexdigest():
+                if id_hash(email) == user["id"]:
+                    if pass_salt_and_hash(password, bytes.fromhex(user["salt"])) == user["password"]:
                         print(user["name"] +
                             ": Username and Password verified. Welcome.")
                         signed_in = True
-                        break
+                        contact_hash = SHA512.new(truncate="256")
+                        contact_hash.update(bytearray(email, "utf-8"))
+                        contact_hash.update(bytearray(password, "utf-8"))
+                        email = ""
+                        password = ""
+                        return contact_hash.hexdigest()
         if not signed_in:
             print("Couldn't sign in, try again.")
