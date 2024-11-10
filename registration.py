@@ -1,6 +1,9 @@
 import json
 from getpass import getpass
 from contacts import users_file
+import Crypto.Random
+from Crypto.Hash import SHA512
+from Crypto.Hash import SHA3_256
 
 # Right now, it is assumed that the users file does not exist if a user is going
 # to be registered - just create the file now
@@ -27,8 +30,16 @@ def register_user():
         elif password1 == "":
             print("Please enter a password.")
     print("\nPasswords match.")
-    user_obj: dict[str, str] = {"name": name, "email": email,
-                                "password": password1}
+    # Perform password encryption with salting
+    salt = Crypto.Random.get_random_bytes(32)
+    pass_hash = SHA512.new(truncate="256")
+    pass_hash.update(bytearray(password1, "utf-8"))
+    pass_hash.update(salt)
+    id_hash = SHA3_256.new()
+    id_hash.update(bytearray(email, "utf-8"))
+    user_obj: dict[str, str] = {"name": name, "id": id_hash.hexdigest(),
+                                "password": pass_hash.hexdigest(), "salt": salt.hex()}
+    # Write output to user JSON file
     with open(users_file, 'w') as f:
         json.dump([user_obj], f)
     print("User registered.")
@@ -41,10 +52,16 @@ def login():
         with open(users_file, 'r') as f:
             users = json.load(f)
             for user in users:
-                if email == user["email"] and password == user["password"]:
-                    print(user["name"] +
-                          ": Username and Password verified. Welcome.")
-                    signed_in = True
-                    break
+                id_hash = SHA3_256.new()
+                id_hash.update(bytearray(email, "utf-8"))
+                if id_hash.hexdigest() == user["id"]:
+                    pass_hash = SHA512.new(truncate="256")
+                    pass_hash.update(bytearray(password, "utf-8"))
+                    pass_hash.update(bytes.fromhex(user["salt"]))
+                    if user["password"] == pass_hash.hexdigest():
+                        print(user["name"] +
+                            ": Username and Password verified. Welcome.")
+                        signed_in = True
+                        break
         if not signed_in:
             print("Couldn't sign in, try again.")
