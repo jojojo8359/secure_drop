@@ -10,11 +10,13 @@ def register_user():
     email: str = input("Enter Email Address: ").strip()
     password1: str = "a"
     password2: str = "b"
-    while password1 != password2:
+    while password1 != password2 or password1 == "":
         password1 = getpass("Enter Password: ")
         password2 = getpass("Re-enter Password: ")
         if password1 != password2:
             print("Passwords don't match, try again.")
+        if password1 == "":
+            print("Please enter a password, try again.")
     print("\nPasswords match.")
     user_obj: dict[str, str] = {"name": name, "email": email,
                                 "password": password1}
