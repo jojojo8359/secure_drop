@@ -1,37 +1,25 @@
 import json
 from getpass import getpass
-from contacts import users_file
 from hash import *
+from util import get_name, get_email, get_password_register, get_password
 
-# Right now, it is assumed that the users file does not exist if a user is going
-# to be registered - just create the file now
-def register_user():
+users_file: str = "users.json"
+
+def register_user() -> None:
+    """
+    Register a new user by prompting for their name, email, and password.
+    
+    Updates the users file with their encrypted information.
+    """
     print("")
-    while True:
-        name: str = input("Enter Full Name: ").strip()
-        if name != "":
-            break
-        print("Please enter a name.")
-    while True:
-        email: str = input("Enter Email Address: ").strip()
-        if email != "":
-            break
-        print("Please enter an email.")
+    name = get_name()
+    email = get_email
 
-    password1: str = "a"
-    password2: str = "b"
-    while password1 != password2 or password1 == "":
-        password1 = getpass("Enter Password: ")
-        password2 = getpass("Re-enter Password: ")
-        if password1 != password2:
-            print("Passwords don't match, try again.")
-        elif password1 == "":
-            print("Please enter a password.")
-    print("\nPasswords match.")
+    password = get_password_register()
     # Perform password encryption with salting
     salt = get_salt()
     user_obj: dict[str, str] = {"name": name, "id": id_hash(email),
-                                "password": pass_salt_and_hash(password1, salt),
+                                "password": pass_salt_and_hash(password, salt),
                                 "salt": salt.hex()}
     # Write output to user JSON file
     with open(users_file, 'w') as f:
@@ -39,15 +27,24 @@ def register_user():
     print("User registered.")
 
 def login() -> str:
+    """
+    Allows a user to log in.
+    
+    Returns a user's contact hash after they sign in (combination of their email
+    and password).
+    """
     signed_in: bool = False
     while not signed_in:
-        email: str = input("Enter Email Address: ").strip()
-        password: str = getpass("Enter Password: ")
+        email: str = get_email()
+        password: str = get_password()
+        # The users file does allow for multiple user profiles to be saved, but
+        # currently only one can be saved at a time
         with open(users_file, 'r') as f:
             users = json.load(f)
             for user in users:
+                salt = bytes.fromhex(user["salt"])
                 if id_hash(email) == user["id"]:
-                    if pass_salt_and_hash(password, bytes.fromhex(user["salt"])) == user["password"]:
+                    if pass_salt_and_hash(password, salt) == user["password"]:
                         print(user["name"] +
                             ": Username and Password verified. Welcome.")
                         signed_in = True
