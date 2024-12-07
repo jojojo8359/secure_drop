@@ -1,12 +1,12 @@
 import os
 import json
 from Crypto.Cipher import AES
-from hash import *
 from util import get_name, get_email
 
 contacts_file: str = "contacts"
 
-def encrypt_contacts_file(data, hash: str):
+
+def encrypt_contacts_file(data, hash_: str):
     """
     Encrypts the provided data with the provided hash, and writes it to the
     contacts file.
@@ -14,14 +14,15 @@ def encrypt_contacts_file(data, hash: str):
     The data provided should be a dictionary or list, since it will be dumped
     by the json library to encode and encrypt.
     """
-    cipher_aes = AES.new(bytes.fromhex(hash), AES.MODE_SIV)
+    cipher_aes = AES.new(bytes.fromhex(hash_), AES.MODE_SIV)
     json_obj = json.dumps(data).encode("utf-8")
     ciphertext, tag = cipher_aes.encrypt_and_digest(json_obj)
     with open(contacts_file, 'wb') as f:
         f.write(tag)
         f.write(ciphertext)
 
-def decrypt_contacts_file(hash: str):
+
+def decrypt_contacts_file(hash_: str):
     """
     Decrypts the contacts file with the provided hash, and returns a Python
     dictionary with the decrypted data.
@@ -36,10 +37,11 @@ def decrypt_contacts_file(hash: str):
         tag = f.read(16)
         ciphertext = f.read()
     # Decrypt raw bytes
-    cipher_aes = AES.new(bytes.fromhex(hash), AES.MODE_SIV)
+    cipher_aes = AES.new(bytes.fromhex(hash_), AES.MODE_SIV)
     data = cipher_aes.decrypt_and_verify(ciphertext, tag)
     # De-JSONify
     return json.loads(data.decode("utf-8"))
+
 
 def add_contact(contact_hash: str) -> None:
     """
@@ -56,6 +58,7 @@ def add_contact(contact_hash: str) -> None:
     contacts[contact_email] = contact_name
     encrypt_contacts_file(contacts, contact_hash)
     print("Contact added.")
+
 
 def list_contacts(contact_hash: str) -> None:
     """

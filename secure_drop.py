@@ -1,12 +1,12 @@
 import os
 import sys
-from registration import users_file, register_user, login
+from registration import USERS_FILE, register_user, login
 from contacts import add_contact, list_contacts
 
 if __name__ == "__main__":
     # if the users file doesn't exist, ask if we want to register a new user to
     # create the file
-    if not os.path.exists(users_file):
+    if not os.path.exists(USERS_FILE):
         # ask if the user wants to register a new user
         print("No users are registered with this client.")
         confirmation: str = ""

@@ -1,5 +1,6 @@
 from getpass import getpass
 
+
 def get_nonempty_input(prompt_str: str, reprompt_str: str) -> str:
     """
     Gets a non-empty string as input from the user.
@@ -14,13 +15,16 @@ def get_nonempty_input(prompt_str: str, reprompt_str: str) -> str:
         print(reprompt_str)
     return s
 
+
 def get_name() -> str:
     """Prompts the user for a full name."""
     return get_nonempty_input("Enter Full Name: ", "Please enter a name.")
 
+
 def get_email() -> str:
     """Prompts the user for an email address."""
     return get_nonempty_input("Enter Email Address: ", "Please enter an email.")
+
 
 def get_password_register() -> str:
     """
@@ -39,6 +43,7 @@ def get_password_register() -> str:
             print("Please enter a password.")
     print("\nPasswords match.")
     return password1
+
 
 def get_password() -> str:
     """

@@ -1,9 +1,9 @@
 import json
-from getpass import getpass
 from hash import *
 from util import get_name, get_email, get_password_register, get_password
 
-users_file: str = "users.json"
+USERS_FILE: str = "users.json"
+
 
 def register_user() -> None:
     """
@@ -13,7 +13,7 @@ def register_user() -> None:
     """
     print("")
     name = get_name()
-    email = get_email
+    email = get_email()
 
     password = get_password_register()
     # Perform password encryption with salting
@@ -22,9 +22,10 @@ def register_user() -> None:
                                 "password": pass_salt_and_hash(password, salt),
                                 "salt": salt.hex()}
     # Write output to user JSON file
-    with open(users_file, 'w') as f:
+    with open(USERS_FILE, 'w') as f:
         json.dump([user_obj], f)
     print("User registered.")
+
 
 def login() -> str:
     """
@@ -39,14 +40,13 @@ def login() -> str:
         password: str = get_password()
         # The users file does allow for multiple user profiles to be saved, but
         # currently only one can be saved at a time
-        with open(users_file, 'r') as f:
+        with open(USERS_FILE, 'r') as f:
             users = json.load(f)
             for user in users:
                 salt = bytes.fromhex(user["salt"])
                 if id_hash(email) == user["id"]:
                     if pass_salt_and_hash(password, salt) == user["password"]:
-                        print(user["name"] +
-                            ": Username and Password verified. Welcome.")
+                        print(user["name"] + ": Username and Password verified. Welcome.")
                         signed_in = True
                         contact_hash = SHA512.new(truncate="256")
                         contact_hash.update(bytearray(email, "utf-8"))
