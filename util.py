@@ -1,6 +1,15 @@
 from getpass import getpass
 
 
+def input_yes_or_no(prompt_str: str) -> bool:
+    while True:
+        s = input(prompt_str).strip().lower()
+        if s == 'y':
+            return True
+        elif s == 'n':
+            return False
+
+
 def get_nonempty_input(prompt_str: str, reprompt_str: str) -> str:
     """
     Gets a non-empty string as input from the user.

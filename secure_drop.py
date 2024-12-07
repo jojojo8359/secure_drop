@@ -2,6 +2,8 @@ import os
 import sys
 from registration import USERS_FILE, register_user, login
 from contacts import add_contact, list_contacts
+from util import input_yes_or_no
+
 
 if __name__ == "__main__":
     # if the users file doesn't exist, ask if we want to register a new user to
@@ -9,19 +11,12 @@ if __name__ == "__main__":
     if not os.path.exists(USERS_FILE):
         # ask if the user wants to register a new user
         print("No users are registered with this client.")
-        confirmation: str = ""
-        while confirmation != "y" and confirmation != "n":
-            confirmation = input("Do you want to register a new user (y/n)? "
-                                 ).strip().lower()
-        if confirmation == "y":
+        if input_yes_or_no("Do you want to register a new user (y/n)? "):
             register_user()
-        elif confirmation == "n":
+        else:
             # quit program
             print("Goodbye!")
             sys.exit(0)
-        else:
-            print("You shouldn't be here - goodbye!")
-            sys.exit(1)
     # if the users file does exist, have the user log in and enter the shell
     else:
         contact_hash = login()
