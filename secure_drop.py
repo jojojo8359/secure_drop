@@ -1,8 +1,7 @@
 import os
-import sys
 from registration import USERS_FILE, register_user, login
 from contacts import add_contact, list_contacts
-from util import input_yes_or_no
+from util import get_yes_or_no, clear_str
 
 
 if __name__ == "__main__":
@@ -11,18 +10,16 @@ if __name__ == "__main__":
     if not os.path.exists(USERS_FILE):
         # ask if the user wants to register a new user
         print("No users are registered with this client.")
-        if input_yes_or_no("Do you want to register a new user (y/n)? "):
+        if get_yes_or_no("Do you want to register a new user (y/n)? "):
             register_user()
         else:
             # quit program
             print("Goodbye!")
-            sys.exit(0)
     # if the users file does exist, have the user log in and enter the shell
     else:
         contact_hash = login()
-        # Shell goes here
         comm: str = ""
-        while True:
+        while True:  # shell
             comm = input("secure_drop> ").lower().strip()
             if comm == "add":
                 add_contact(contact_hash)
@@ -35,8 +32,11 @@ if __name__ == "__main__":
                 print("  \"send\" -> Transfer file to contact")
                 print("  \"exit\" -> Exit SecureDrop")
             elif comm == "exit":
+                clear_str(contact_hash)
                 break
             elif comm == "send":
-                print("File transfer not yet implemented")
+                print("File transfer not yet implemented.")
+            elif comm == "":
+                pass
             else:
-                print("Command not recognized")
+                print("Command not recognized.")
