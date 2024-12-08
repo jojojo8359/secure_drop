@@ -2,7 +2,7 @@ import os
 import json
 from filenames import CONTACTS_FILE
 from hash import encrypt, decrypt
-from util import get_name, get_email, clear_str
+from util import get_name, get_email
 
 
 def encrypt_contacts_file(data, key: str):
@@ -42,13 +42,9 @@ def add_contact(contact_hash: str) -> None:
     The contact hash is needed to encrypt and decrypt contact data with the
     current user's (now encrypted) credentials.
     """
-    contact_name: str = get_name()
-    contact_email: str = get_email()
     contacts: dict = decrypt_contacts_file(contact_hash) if os.path.exists(CONTACTS_FILE) else {}
-    contacts[contact_email] = contact_name
+    contacts[get_email()] = get_name()
     encrypt_contacts_file(contacts, contact_hash)
-    clear_str(contact_name)
-    clear_str(contact_email)
     print("Contact added.")
 
 
