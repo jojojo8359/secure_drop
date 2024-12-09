@@ -69,4 +69,4 @@ def clear_str(s: str) -> None:
     Clears string from memory
     """
     s += '\0' * random.choice(range(30))  # add random number of characters to conceal length
-    ctypes.memset(id(s) + ctypes.sizeof(ctypes.c_size_t) * 2, 0, len(s))
+    ctypes.memset(id(s), 0, len(s))
