@@ -1,0 +1,30 @@
+Generate CA Private Key:
+`openssl genrsa -out ca.key.pem 2048`
+
+Generate CA Certificate:
+`openssl req -new -x509 -key ca.key.pem -out ca.cert.pem`
+Enter "." for all fields except for Common Name, which should be "g4_secure_drop"
+
+Look at CA Certificate:
+`openssl x509 -noout -text -in ca.cert.pem`
+
+Generate client Private Key:
+`openssl genrsa -out client1.key.pem 2048`
+
+Generate client CSR (Request):
+`openssl req -key client1.key.pem -new -sha256 -out client1.csr.pem`
+Enter "." for all fields except for Common Name and Email address, which should both be "client1@foo.com"
+
+Generate client Certificate using CA:
+`openssl x509 -req -in client1.csr.pem -CA ca.cert.pem -CAkey ca.key.pem -CAcreateserial -out client1.cert.pem`
+
+Look at client Certificate:
+`openssl x509 -noout -text -in client1.cert.pem`
+
+Verify that client Certificate was signed by CA:
+`openssl verify -CAfile ca.cert.pem client1.cert.pem`
+
+
+python3 tcp_server.py localhost 1234 client1.key.pem client1.cert.pem client1@foo.com
+
+python3 tcp_client.py localhost 1234 client2.key.pem client2.cert.pem client2@foo.com
