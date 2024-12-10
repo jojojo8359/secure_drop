@@ -63,3 +63,4 @@ def list_contacts(contact_hash: str) -> None:
         print("  The following contacts are online:")
         for email, name in contacts.items():
             print(f"  * {name} < {email} >")
+        del contacts

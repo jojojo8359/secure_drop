@@ -1,6 +1,4 @@
-import ctypes
 from getpass import getpass
-import random
 
 
 def get_yes_or_no(prompt_str: str) -> bool:
@@ -53,7 +51,7 @@ def get_password_register() -> str:
         elif password1 == "":
             print("Please enter a password.")
     print("\nPasswords match.")
-    clear_str(password2)
+    del password2
     return password1
 
 
@@ -62,11 +60,3 @@ def get_password() -> str:
     Prompts the user to enter a password using getpass to hide password inputs.
     """
     return getpass("Enter Password: ")
-
-
-def clear_str(s: str) -> None:
-    """
-    Clears string from memory
-    """
-    s += '\0' * random.choice(range(30))  # add random number of characters to conceal length
-    ctypes.memset(id(s), 0, len(s))

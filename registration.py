@@ -2,7 +2,7 @@ import json
 import os
 from filenames import USERS_FILE
 from hash import id_hash, get_salt, pass_salt_and_hash, user_contact_hash, encrypt, decrypt
-from util import get_name, get_email, get_password_register, get_password, clear_str
+from util import get_name, get_email, get_password_register, get_password
 
 
 class WrongInfo(Exception):
@@ -34,12 +34,12 @@ def register_user() -> None:
         json.dump({'info': tag.hex() + user_info.hex(), 'salt': salt.hex()}, f)
     os.chmod(USERS_FILE, 0o444)  # make file read only
 
-    clear_str(name)
-    clear_str(email)
-    clear_str(id_)
-    clear_str(password)
-    clear_str(contact_hash)
-    clear_str(password_hash)
+    del name
+    del email
+    del id_
+    del password
+    del contact_hash
+    del password_hash
     print("User registered.")
 
 
@@ -70,17 +70,17 @@ def login() -> str:
                 raise WrongInfo
         except Exception:
             # if given wrong email and password json decoder will fail
-            clear_str(email)
-            clear_str(password)
-            clear_str(id_)
-            clear_str(password_hash)
-            clear_str(contact_hash)
+            del email
+            del password
+            del id_
+            del password_hash
+            del contact_hash
             print("Couldn't sign in, try again.")
         else:
             # decode succeeded, i.e. correct email and password
-            clear_str(email)
-            clear_str(password)
-            clear_str(id_)
-            clear_str(password_hash)
+            del email
+            del password
+            del id_
+            del password_hash
             print(f"Username and Password verified. Welcome, {user_info['name']}.")
             return contact_hash

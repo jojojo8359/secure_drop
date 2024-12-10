@@ -1,7 +1,7 @@
 import os
 from registration import USERS_FILE, register_user, login
 from contacts import add_contact, list_contacts
-from util import get_yes_or_no, clear_str
+from util import get_yes_or_no
 
 
 if __name__ == "__main__":
@@ -32,7 +32,7 @@ if __name__ == "__main__":
                 print("  \"send\" -> Transfer file to contact")
                 print("  \"exit\" -> Exit SecureDrop")
             elif comm == "exit":
-                clear_str(contact_hash)
+                del contact_hash
                 break
             elif comm == "send":
                 print("File transfer not yet implemented.")
