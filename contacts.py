@@ -59,7 +59,9 @@ def list_contacts(contact_hash: str) -> None:
     if len(contacts) < 1:
         print("No contacts saved")
     else:
-        # Go through contacts
+        # Broadcast my id
+        # get responses from everyone, I will get their ID back if I am in their contact
+        # Go through my contacts, match IDs I get back against theirs, list them if matches
         print("  The following contacts are online:")
         for email, name in contacts.items():
             print(f"  * {name} < {email} >")
