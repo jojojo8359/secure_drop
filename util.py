@@ -1,13 +1,14 @@
 from getpass import getpass
 
 
-def get_yes_or_no(prompt_str: str) -> bool:
+def get_yes_or_no(prompt_str: str, first_input: str | None = None) -> bool:
+    s: str = first_input.strip().lower() if first_input is not None else ''
     while True:
-        s: str = input(prompt_str).strip().lower()
         if s == 'y':
             return True
         elif s == 'n':
             return False
+        s = input(prompt_str).strip().lower()
 
 
 def get_nonempty_input(prompt_str: str, reprompt_str: str) -> str:
