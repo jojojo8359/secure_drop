@@ -1,6 +1,7 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key
+from tcp import send_msg, recv_msg
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -45,6 +46,25 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                 else:
                     print("Client: couldn't validate server certificate! Closing connection...")
                     ssock.shutdown(socket.SHUT_RDWR)
+                
+                # Sync - receive ready
+                # TODO: connection drop handling
+                print("Waiting to receive sync message...")
+                sync_msg = recv_msg(ssock)
+                if sync_msg.decode() == 'ready':
+                    print("Received sync message")
+                    # Sync - send ready
+                    send_msg(ssock, 'ready'.encode())
+                    print("Sent sync message")
+                else:
+                    print("Sync message corrupted, exiting...")
+                    ssock.shutdown(socket.SHUT_RDWR)
+                
+                # Receive public key signature
+                peer_data_key_pub_sig = recv_msg(ssock)
+                print("Pub key signature received")
+                print("Pub key signature: " + peer_data_key_pub_sig.hex())
+                
                 time.sleep(1)
         except ssl.SSLCertVerificationError as e:
             print("ERROR: SSL connection failed due to certificate verification: " + e.strerror)

@@ -1,6 +1,7 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_sign
+from tcp import send_msg, recv_msg
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -53,9 +54,26 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 print("Server: couldn't validate client certificate! Closing connection...")
                 conn.shutdown(socket.SHUT_RDWR)
             data_key = ec_gen_private_key()
-            data_key_pub: bytes = ec_pub_key_to_bytes(data_key)
+            data_key_pub: bytes = ec_pub_key_to_bytes(data_key.public_key())
             data_key_pub_sig: bytes = ec_sign(signing_key, data_key_pub)
-            print(str(len(bytearray(data_key_pub_sig))))
+            
+            # Sync - send ready
+            send_msg(conn, 'ready'.encode())
+            print("Sent sync message")
+            
+            # Sync - receive ready
+            print("Waiting to receive sync message...")
+            sync_msg = recv_msg(conn)
+            if sync_msg.decode() == 'ready':
+                print("Received sync message")
+            else:
+                print("Sync message corrupted, exiting...")
+                conn.shutdown(socket.SHUT_RDWR)
+            
+            print("Pub key signature: " + data_key_pub_sig.hex())
+            send_msg(conn, data_key_pub_sig)
+            print("Pub key signature sent")
+            
             time.sleep(1)
         finally:
             conn.close()
