@@ -47,7 +47,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     ssock.shutdown(socket.SHUT_RDWR)
                 time.sleep(1)
         except ssl.SSLCertVerificationError as e:
-            print("ERROR: SSL connection failed due to certificate verification: " + e.reason)
+            print("ERROR: SSL connection failed due to certificate verification: " + e.strerror)
             sys.exit(1)
     finally:
         print("Client: connection closed")

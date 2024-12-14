@@ -1,6 +1,6 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
-from ecdh import ec_gen_private_key
+from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_sign
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -40,7 +40,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
         try:
             conn, addr = ssock.accept()
         except ssl.SSLError as e:
-            print("ERROR: SSL connection failed: " + e.reason)
+            print("ERROR: SSL connection failed: " + e.strerror)
             sys.exit(1)
         try:
             print(str(addr) + " connected")
@@ -52,6 +52,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
             else:
                 print("Server: couldn't validate client certificate! Closing connection...")
                 conn.shutdown(socket.SHUT_RDWR)
+            data_key = ec_gen_private_key()
+            data_key_pub: bytes = ec_pub_key_to_bytes(data_key)
+            data_key_pub_sig: bytes = ec_sign(signing_key, data_key_pub)
+            print(str(len(bytearray(data_key_pub_sig))))
             time.sleep(1)
         finally:
             conn.close()
