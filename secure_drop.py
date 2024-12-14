@@ -1,4 +1,5 @@
 import os
+import socket
 import threading
 
 from contacts import decrypt_contacts_file
@@ -25,6 +26,7 @@ def start() -> None:
         user_id, contact_hash = login()
 
         udp_server_socket = get_udp_server_socket()
+        udp_server_socket.settimeout(1)
 
         while last_input != 'exit':
             shell_stop_event = threading.Event()
@@ -32,15 +34,19 @@ def start() -> None:
             shell_thread.start()
 
             while shell_thread.is_alive():
-                data, sender_address = udp_server_socket.recvfrom(4096)
-                data = data.decode('utf-8')
+                try:
+                    data, sender_address = udp_server_socket.recvfrom(4096)
+                except socket.timeout:
+                    continue
+                else:
+                    data = data.decode('utf-8')
 
-                contacts_list: dict[str, str] = decrypt_contacts_file(contact_hash)
-                for contact in contacts_list:
-                    if data == id_hash(contact):
-                        udp_server_socket.sendto(user_id.encode('utf-8'), sender_address)
-                        break
-                del contacts_list
+                    contacts_list: dict[str, str] = decrypt_contacts_file(contact_hash)
+                    for contact in contacts_list:
+                        if data == id_hash(contact):
+                            udp_server_socket.sendto(user_id.encode('utf-8'), sender_address)
+                            break
+                    del contacts_list
 
         del user_id, contact_hash
 
