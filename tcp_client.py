@@ -35,13 +35,14 @@ context.load_cert_chain(certfile=CLIENT_CERT_FILE, keyfile=CLIENT_KEY_FILE)
 with socket.create_connection((args.host_address, args.host_port)) as sock:
     with context.wrap_socket(sock, server_side=False, server_hostname=args.server_email) as ssock:
         print(ssock.version())
+        ssock.do_handshake()
         # prepare to transfer
         # receiver pub/priv keys should be created if not already
         
         # receiver sends sender: public key
-        with open(args.key, 'r') as f:
-            keydata = f.read()
-        ssock.send(keydata.encode())
+        # with open(args.key, 'r') as f:
+        #     keydata = f.read()
+        # ssock.send(keydata.encode())
         # wait for ack
         # receiver sends sender: certificate
         # wait for auth ack

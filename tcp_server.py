@@ -46,5 +46,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
     with context.wrap_socket(sock, server_side=True) as ssock:
         conn, addr = ssock.accept()
         print(str(addr) + " connected")
-        pubkey = conn.recv(2048).decode()
-        print(pubkey)
+        # pubkey = conn.recv(2048).decode()
+        conn.do_handshake()
+        print(conn.getpeername())
+        # print(pubkey)
