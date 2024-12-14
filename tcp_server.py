@@ -1,6 +1,6 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
-from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_sign
+from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_bytes_to_pub_key, ec_sign, ec_verify, get_shared_key
 from tcp import send_msg, recv_msg
 import socket, ssl, argparse, sys, time
 from cryptography import x509
@@ -70,9 +70,28 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 print("Sync message corrupted, exiting...")
                 conn.shutdown(socket.SHUT_RDWR)
             
-            print("Pub key signature: " + data_key_pub_sig.hex())
+            print("My pub key signature: " + data_key_pub_sig.hex())
             send_msg(conn, data_key_pub_sig)
-            print("Pub key signature sent")
+            print("My pub key signature sent")
+            
+            print("My pub key: " + data_key_pub.hex())
+            send_msg(conn, data_key_pub)
+            print("My pub key sent")
+            
+            peer_data_key_pub_sig = recv_msg(conn)
+            print("Peer pub key signature received")
+            print("Peer pub key signature: " + peer_data_key_pub_sig.hex())
+            
+            peer_data_key_pub_bytes = recv_msg(conn)
+            print("Peer pub key received")
+            print("Peer pub key: " + peer_data_key_pub_bytes.hex())
+            peer_data_key_pub = ec_bytes_to_pub_key(bytes(peer_data_key_pub_bytes))
+            if not ec_verify(peer_cert.public_key(), bytes(peer_data_key_pub_sig), peer_data_key_pub):
+                print("Server: couldn't verify signature of public key, exiting...")
+                conn.shutdown(socket.SHUT_RDWR)
+            
+            shared_key = get_shared_key(data_key, peer_data_key_pub)
+            print("Shared key: " + shared_key.hex())
             
             time.sleep(1)
         finally:
