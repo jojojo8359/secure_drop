@@ -5,7 +5,7 @@ from contacts import decrypt_contacts_file
 from hash import id_hash
 from networking import get_udp_server_socket
 from registration import USERS_FILE, register_user, login
-from shell import shell
+from shell import shell, last_input
 from util import get_yes_or_no
 
 
@@ -26,12 +26,12 @@ def start() -> None:
 
         udp_server_socket = get_udp_server_socket()
 
-        while True:
+        while last_input != 'exit':
             shell_stop_event = threading.Event()
             shell_thread = threading.Thread(target=shell, args=(contact_hash, user_id, shell_stop_event))
             shell_thread.start()
 
-            while True:
+            while shell_thread.is_alive():
                 data, sender_address = udp_server_socket.recvfrom(4096)
                 data = data.decode('utf-8')
 
@@ -42,7 +42,7 @@ def start() -> None:
                         break
                 del contacts_list
 
-        del login_info
+        del user_id, contact_hash
 
 
 if __name__ == "__main__":
