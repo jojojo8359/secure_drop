@@ -5,8 +5,8 @@ import last_input
 
 
 def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
+    comm: str = ''
     while not stop_event.is_set():
-        last_input.last_input = comm = input("secure_drop> ").lower().strip()
         if comm == "add":
             add_contact(contact_hash)
         elif comm == "list":
@@ -21,6 +21,8 @@ def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
         elif comm == "send":
             print("File transfer not yet implemented.")
         elif comm == "":
-            continue
+            pass
         else:
             print("Command not recognized.")
+
+        last_input.last_input = comm = input("secure_drop> ").lower().strip()

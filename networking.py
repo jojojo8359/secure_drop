@@ -16,14 +16,16 @@ def get_udp_server_socket() -> socket.socket:
     return udp_socket
 
 
-def broadcast_id(id_: str, received_list: list[str], stop_event: threading.Event) -> None:
+def broadcast_id(id_: str, received_list: list[str], stop_event: threading.Event, mode: str) -> None:
     """
     Broadcasts user ID via UDP, appends any user which had the ID in their contacts to received_list
+
+    mode: ping (see which contacts are online) or send (want to send file to a specific user)
     """
 
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    broadcast_socket.sendto(id_.encode('utf-8'), (BROADCAST_IP, PORT))
+    broadcast_socket.sendto((id_+mode).encode('utf-8'), (BROADCAST_IP, PORT))
 
     broadcast_socket.settimeout(1)
     while not stop_event.is_set():

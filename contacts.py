@@ -67,7 +67,7 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
 
         # run thread for 1 second to see online contacts
         stop_event = threading.Event()
-        thread = threading.Thread(target=broadcast_id, args=(user_id, received_list, stop_event))
+        thread = threading.Thread(target=broadcast_id, args=(user_id, received_list, stop_event, 'ping'))
         thread.start()
         time.sleep(1)
         stop_event.set()
