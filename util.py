@@ -1,7 +1,7 @@
 from getpass import getpass
+from typing import Union
 
-
-def get_yes_or_no(prompt_str: str, first_input: str | None = None) -> bool:
+def get_yes_or_no(prompt_str: str, first_input: Union[str, None] = None) -> bool:
     s: str = first_input.strip().lower() if first_input is not None else ''
     while True:
         if s == 'y':
