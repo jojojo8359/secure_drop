@@ -1,7 +1,11 @@
-import os
 import json
+import os
+import threading
+import time
+
 from filenames import CONTACTS_FILE
-from hash import encrypt, decrypt
+from hash import encrypt, decrypt, id_hash
+from networking import broadcast_id
 from util import get_name, get_email
 
 
@@ -48,21 +52,38 @@ def add_contact(contact_hash: str) -> None:
     print("Contact added.")
 
 
-def list_contacts(contact_hash: str) -> None:
+def list_contacts(contact_hash: str, user_id: str) -> None:
     """
-    Lists the current contacts stored in the contacts file.
+    Lists the online contacts stored in the contacts file.
     
     The contact hash is needed to decrypt contact data with the current user's
     (now encrypted) credentials.
     """
     contacts: dict[str, str] = decrypt_contacts_file(contact_hash)
     if len(contacts) < 1:
-        print("No contacts saved")
+        print("  No contacts saved.")
     else:
-        # Broadcast my id
+        received_list: list[str] = []  # will have a list of hashed emails
+
+        # run thread for 1 second to see online contacts
+        stop_event = threading.Event()
+        thread = threading.Thread(target=broadcast_id, args=(user_id, received_list, stop_event))
+        thread.start()
+        time.sleep(1)
+        stop_event.set()
+        thread.join()
+
         # get responses from everyone, I will get their ID back if I am in their contact
         # Go through my contacts, match IDs I get back against theirs, list them if matches
-        print("  The following contacts are online:")
+
+        output: str = ""
         for email, name in contacts.items():
-            print(f"  * {name} < {email} >")
-        del contacts
+            if id_hash(email) in received_list:
+                output += f"  * {name} < {email} >\n"
+        if output == "":
+            print("  No contacts are online.")
+        else:
+            print("  The following contacts are online:\n" + output)
+        del output
+
+    del contacts

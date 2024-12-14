@@ -43,12 +43,11 @@ def register_user() -> None:
     print("User registered.")
 
 
-def login() -> str:
+def login() -> [str, str]:
     """
     Allows a user to log in.
     
-    Returns a user's contact hash after they sign in (combination of their email
-    and password).
+    Returns a user's id (hashed email) contact hash (combination of their email and password) after they sign in.
     """
     with open(USERS_FILE, 'r') as f:
         contents: dict[str, str] = json.load(f)
@@ -80,7 +79,6 @@ def login() -> str:
             # decode succeeded, i.e. correct email and password
             del email
             del password
-            del id_
             del password_hash
             print(f"Username and Password verified. Welcome, {user_info['name']}.")
-            return contact_hash
+            return id_, contact_hash
