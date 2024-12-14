@@ -10,6 +10,7 @@ from shell import shell
 from util import get_yes_or_no
 import last_input
 
+
 def start() -> None:
     # if the users file doesn't exist, ask if we want to register a new user to
     # create the file
