@@ -30,7 +30,7 @@ def recv_checksum(sock: ssl.SSLSocket) -> Union[bytes, None]:
         return None
     checksum = msg[0:32]
     msg_body = msg[32:]
-    hash = SHA3_256().new()
+    hash = SHA3_256.new()
     hash.update(msg_body)
     if checksum == hash.digest():
         print("Checksum matches")
