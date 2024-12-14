@@ -5,15 +5,15 @@ from typing import Union
 # this would require adding 256 bits to the beginning of the message
 
 def send_msg(sock: ssl.SSLSocket, msg: bytes) -> None:
-    # Prefix each message with an 8-byte length (network byte order)
-    packed_msg = struct.pack('>L', len(msg)) + msg
+    # Prefix each message with an 4-byte length (network byte order)
+    packed_msg = struct.pack('>I', len(msg)) + msg
     sock.sendall(packed_msg)
 
 def recv_msg(sock: ssl.SSLSocket) -> Union[bytearray, None]:
-    raw_msglen = recvall(sock, 8)
+    raw_msglen = recvall(sock, 4)
     if not raw_msglen:
         return None
-    msglen = struct.unpack('>L', raw_msglen)[0]
+    msglen = struct.unpack('>I', raw_msglen)[0]
     return recvall(sock, msglen)
 
 def recvall(sock: ssl.SSLSocket, n: int) -> Union[bytearray, None]:
