@@ -1,7 +1,7 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_bytes_to_pub_key, ec_sign, ec_verify, get_shared_key
-from tcp import send_msg, recv_msg
+from tcp import send_msg, recv_msg, gen_shared_bundle
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -45,50 +45,81 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
             sys.exit(1)
         try:
             print(str(addr) + " connected")
-            conn.do_handshake(block=True)
+            
+            try:
+                conn.do_handshake(block=True)
+            except:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: connection dropped by peer, exiting...")
+                sys.exit(1)
+            
             print("Server: handshake done")
-            peer_cert = x509.load_der_x509_certificate(conn.getpeercert(binary_form=True))
+            
+            try:
+                peer_cert_der = conn.getpeercert(binary_form=True)
+            except:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: connection dropped by peer, exiting...")
+                sys.exit(1)
+            
+            
+            peer_cert = x509.load_der_x509_certificate(peer_cert_der)
             if validate_cert(peer_cert, args.peer_email):
                 print("Server: successfully validated client certificate!")
             else:
                 print("Server: couldn't validate client certificate! Closing connection...")
                 conn.shutdown(socket.SHUT_RDWR)
-            data_key = ec_gen_private_key()
-            data_key_pub: bytes = ec_pub_key_to_bytes(data_key.public_key())
-            data_key_pub_sig: bytes = ec_sign(signing_key, data_key_pub)
+                sys.exit(1)
             
+            data_key, data_key_pub, data_key_pub_sig = gen_shared_bundle(signing_key)
+
             # Sync - send ready
-            send_msg(conn, 'ready'.encode())
-            print("Sent sync message")
+            try:
+                send_msg(conn, 'ready'.encode())
+            except:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: connection dropped by peer, exiting...")
+                sys.exit(1)
             
             # Sync - receive ready
-            print("Waiting to receive sync message...")
-            sync_msg = recv_msg(conn)
-            if sync_msg.decode() == 'ready':
-                print("Received sync message")
-            else:
-                print("Sync message corrupted, exiting...")
+            try:
+                sync_msg = recv_msg(conn)
+            except:
                 conn.shutdown(socket.SHUT_RDWR)
+                print("Server: connection dropped by peer, exiting...")
+                sys.exit(1)
+
+            if sync_msg == None or sync_msg.decode() != 'ready':
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: received sync message corrupted, exiting...")
+                sys.exit(1)
             
-            print("My pub key signature: " + data_key_pub_sig.hex())
-            send_msg(conn, data_key_pub_sig)
-            print("My pub key signature sent")
+            try:
+                send_msg(conn, data_key_pub_sig)
+                send_msg(conn, data_key_pub)
+            except:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: connection dropped by peer, exiting...")
+                sys.exit(1)
             
-            print("My pub key: " + data_key_pub.hex())
-            send_msg(conn, data_key_pub)
-            print("My pub key sent")
+            try:
+                peer_data_key_pub_sig = recv_msg(conn)
+                peer_data_key_pub_bytes = recv_msg(conn)
+            except:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: connection dropped by peer, exiting...")
+                sys.exit(1)
             
-            peer_data_key_pub_sig = recv_msg(conn)
-            print("Peer pub key signature received")
-            print("Peer pub key signature: " + peer_data_key_pub_sig.hex())
+            if peer_data_key_pub_bytes == None:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: received data public key corrupted, exiting...")
+                sys.exit(1)
             
-            peer_data_key_pub_bytes = recv_msg(conn)
-            print("Peer pub key received")
-            print("Peer pub key: " + peer_data_key_pub_bytes.hex())
-            peer_data_key_pub = ec_bytes_to_pub_key(bytes(peer_data_key_pub_bytes))
-            if not ec_verify(peer_cert.public_key(), bytes(peer_data_key_pub_sig), peer_data_key_pub):
+            peer_data_key_pub = ec_bytes_to_pub_key(peer_data_key_pub_bytes)
+            if not ec_verify(peer_cert.public_key(), peer_data_key_pub_sig, peer_data_key_pub_bytes):
+                conn.shutdown(socket.SHUT_RDWR)
                 print("Server: couldn't verify signature of public key, exiting...")
-                conn.shutdown(socket.SHUT_RDWR)
+                sys.exit(1)
             
             shared_key = get_shared_key(data_key, peer_data_key_pub)
             print("Shared key: " + shared_key.hex())
