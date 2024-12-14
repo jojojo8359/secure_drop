@@ -1,6 +1,6 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
-from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_bytes_to_pub_key, ec_sign, ec_verify, get_shared_key
+from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
 from tcp import send_checksum, recv_checksum, gen_shared_bundle
 import socket, ssl, argparse, sys, time
 from cryptography import x509
@@ -43,7 +43,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     ssock.do_handshake(block=True)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: connection dropped by peer, exiting...")
+                    print("Client: handshake: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
                 print("Client: handshake done")
@@ -52,7 +52,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     peer_cert_der = ssock.getpeercert(binary_form=True)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: connection dropped by peer, exiting...")
+                    print("Client: peer cert: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
                 peer_cert = x509.load_der_x509_certificate(peer_cert_der)
@@ -70,7 +70,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     sync_msg = recv_checksum(ssock)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: connection dropped by peer, exiting...")
+                    print("Client: r-sync: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
                 if sync_msg == None or sync_msg.decode() != 'ready':
@@ -83,7 +83,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     send_checksum(ssock, 'ready'.encode())
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: connection dropped by peer, exiting...")
+                    print("Client: s-sync: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
                 # Receive public key signature
@@ -92,7 +92,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     peer_data_key_pub_bytes = recv_checksum(ssock)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: connection dropped by peer, exiting...")
+                    print("Client: r-key: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
                 if peer_data_key_pub_bytes == None or peer_data_key_pub_sig == None:
@@ -111,7 +111,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     send_checksum(ssock, data_key_pub)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: connection dropped by peer, exiting...")
+                    print("Client: s-key: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
                 shared_key = get_shared_key(data_key, peer_data_key_pub)

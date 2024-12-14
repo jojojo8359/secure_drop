@@ -33,7 +33,9 @@ def recv_checksum(sock: ssl.SSLSocket) -> Union[bytes, None]:
     hash = SHA3_256().new()
     hash.update(msg_body)
     if checksum == hash.digest():
+        print("Checksum matches")
         return msg_body
+    print("Checksum does not match")
     return None
 
 def recvall(sock: ssl.SSLSocket, n: int) -> Union[bytes, None]:

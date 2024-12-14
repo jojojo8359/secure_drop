@@ -1,6 +1,6 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
-from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_bytes_to_pub_key, ec_sign, ec_verify, get_shared_key
+from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
 from tcp import send_checksum, recv_checksum, gen_shared_bundle
 import socket, ssl, argparse, sys, time
 from cryptography import x509
@@ -50,7 +50,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 conn.do_handshake(block=True)
             except:
                 conn.shutdown(socket.SHUT_RDWR)
-                print("Server: connection dropped by peer, exiting...")
+                print("Server: handshake: connection dropped by peer, exiting...")
                 sys.exit(1)
             
             print("Server: handshake done")
@@ -59,7 +59,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 peer_cert_der = conn.getpeercert(binary_form=True)
             except:
                 conn.shutdown(socket.SHUT_RDWR)
-                print("Server: connection dropped by peer, exiting...")
+                print("Server: peer cert: connection dropped by peer, exiting...")
                 sys.exit(1)
             
             
@@ -78,7 +78,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 send_checksum(conn, 'ready'.encode())
             except:
                 conn.shutdown(socket.SHUT_RDWR)
-                print("Server: connection dropped by peer, exiting...")
+                print("Server: s-sync: connection dropped by peer, exiting...")
                 sys.exit(1)
             
             # Sync - receive ready
@@ -86,7 +86,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 sync_msg = recv_checksum(conn)
             except:
                 conn.shutdown(socket.SHUT_RDWR)
-                print("Server: connection dropped by peer, exiting...")
+                print("Server: r-sync: connection dropped by peer, exiting...")
                 sys.exit(1)
 
             if sync_msg == None or sync_msg.decode() != 'ready':
@@ -99,7 +99,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 send_checksum(conn, data_key_pub)
             except:
                 conn.shutdown(socket.SHUT_RDWR)
-                print("Server: connection dropped by peer, exiting...")
+                print("Server: s-key: connection dropped by peer, exiting...")
                 sys.exit(1)
             
             try:
@@ -107,7 +107,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 peer_data_key_pub_bytes = recv_checksum(conn)
             except:
                 conn.shutdown(socket.SHUT_RDWR)
-                print("Server: connection dropped by peer, exiting...")
+                print("Server: r-key: connection dropped by peer, exiting...")
                 sys.exit(1)
             
             if peer_data_key_pub_bytes == None or peer_data_key_pub_sig == None:
