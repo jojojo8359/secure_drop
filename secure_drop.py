@@ -6,9 +6,9 @@ from contacts import decrypt_contacts_file
 from hash import id_hash
 from networking import get_udp_server_socket
 from registration import USERS_FILE, register_user, login
-from shell import shell, last_input
+from shell import shell
 from util import get_yes_or_no
-
+import last_input
 
 def start() -> None:
     # if the users file doesn't exist, ask if we want to register a new user to
@@ -28,7 +28,7 @@ def start() -> None:
         udp_server_socket = get_udp_server_socket()
         udp_server_socket.settimeout(1)
 
-        while last_input != 'exit':
+        while last_input.last_input != 'exit':
             shell_stop_event = threading.Event()
             shell_thread = threading.Thread(target=shell, args=(contact_hash, user_id, shell_stop_event))
             shell_thread.start()

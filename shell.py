@@ -1,16 +1,12 @@
 import threading
 
 from contacts import add_contact, list_contacts
-
-
-global last_input
-last_input: str
+import last_input
 
 
 def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
-    global last_input
     while not stop_event.is_set():
-        last_input = comm = input("secure_drop> ").lower().strip()
+        last_input.last_input = comm = input("secure_drop> ").lower().strip()
         if comm == "add":
             add_contact(contact_hash)
         elif comm == "list":
