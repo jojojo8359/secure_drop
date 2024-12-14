@@ -28,7 +28,7 @@ def start() -> None:
 
         while True:
             shell_stop_event = threading.Event()
-            shell_thread = threading.Thread(target=shell, args=(user_id, contact_hash, shell_stop_event))
+            shell_thread = threading.Thread(target=shell, args=(contact_hash, user_id, shell_stop_event))
             shell_thread.start()
 
             while True:
@@ -41,9 +41,6 @@ def start() -> None:
                         udp_server_socket.sendto(user_id.encode('utf-8'), sender_address)
                         break
                 del contacts_list
-
-                import sys
-                sys.exit(69)
 
         del login_info
 
