@@ -1,6 +1,7 @@
 import socket
 import threading
 
+
 SERVER_IP = "0.0.0.0"
 BROADCAST_IP = "255.255.255.255"
 PORT = 9999
