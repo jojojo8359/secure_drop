@@ -137,3 +137,5 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
     finally:
         print("Client: connection closed")
         sock.close()
+        os.remove(CLIENT_CERT_FILE)
+        os.remove(CLIENT_KEY_FILE)

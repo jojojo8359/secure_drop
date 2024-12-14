@@ -143,5 +143,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
             
             time.sleep(1)
         finally:
-            conn.close()
             print("Server: connection closed")
+            conn.close()
+            os.remove(CLIENT_CERT_FILE)
+            os.remove(CLIENT_KEY_FILE)
