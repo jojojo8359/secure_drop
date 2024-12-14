@@ -37,7 +37,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
     sock.listen(5)
     with context.wrap_socket(sock, server_side=True) as ssock:
         print("Server: waiting for connection")
-        conn, addr = ssock.accept()
+        try:
+            conn, addr = ssock.accept()
+        except ssl.SSLError as e:
+            print("ERROR: SSL connection failed: " + e.reason)
+            sys.exit(1)
         try:
             print(str(addr) + " connected")
             conn.do_handshake(block=True)
@@ -46,7 +50,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
             if validate_cert(peer_cert, args.peer_email):
                 print("Server: successfully validated client certificate!")
             else:
-                print("Server: couldn't validate client certificate!")
+                print("Server: couldn't validate client certificate! Closing connection...")
+                conn.shutdown(socket.SHUT_RDWR)
             time.sleep(1)
         finally:
             conn.close()

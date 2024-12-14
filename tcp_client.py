@@ -33,17 +33,22 @@ context.load_cert_chain(certfile=CLIENT_CERT_FILE, keyfile=CLIENT_KEY_FILE)
 with socket.create_connection((args.host_address, args.host_port)) as sock:
     try:
         print("Client: connection established to " + args.host_address + ":" + str(args.host_port))
-        with context.wrap_socket(sock, server_side=False, server_hostname=args.peer_email) as ssock:
-            print("Client: connection upgraded to SSL")
-            print(ssock.version())
-            ssock.do_handshake(block=True)
-            print("Client: handshake done")
-            peer_cert = x509.load_der_x509_certificate(ssock.getpeercert(binary_form=True))
-            if validate_cert(peer_cert, args.peer_email):
-                print("Client: successfully validated server certificate!")
-            else:
-                print("Client: couldn't validate server certificate!")
-            time.sleep(1)
+        try:
+            with context.wrap_socket(sock, server_side=False, server_hostname=args.peer_email) as ssock:
+                print("Client: connection upgraded to SSL")
+                print(ssock.version())
+                ssock.do_handshake(block=True)
+                print("Client: handshake done")
+                peer_cert = x509.load_der_x509_certificate(ssock.getpeercert(binary_form=True))
+                if validate_cert(peer_cert, args.peer_email):
+                    print("Client: successfully validated server certificate!")
+                else:
+                    print("Client: couldn't validate server certificate! Closing connection...")
+                    ssock.shutdown(socket.SHUT_RDWR)
+                time.sleep(1)
+        except ssl.SSLCertVerificationError as e:
+            print("ERROR: SSL connection failed due to certificate verification: " + e.reason)
+            sys.exit(1)
     finally:
         print("Client: connection closed")
         sock.close()
