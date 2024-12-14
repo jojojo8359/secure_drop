@@ -2,7 +2,7 @@ from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
 from tcp import send_checksum, recv_checksum, send_encrypted, recv_encrypted, gen_shared_bundle
-import socket, ssl, argparse, sys, time
+import socket, ssl, argparse, sys, time, os
 from cryptography import x509
 
 # RECEIVER
@@ -118,13 +118,17 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                 print("Shared key: " + shared_key.hex())
                 
                 try:
-                    message = recv_encrypted(ssock, shared_key)
+                    filename = recv_encrypted(ssock, shared_key).decode()
+                    data = recv_encrypted(ssock, shared_key)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: message: connection dropped by peer, exiting...")
+                    print("Client: data: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
-                print("Received message: " + str(message))
+                if not os.path.isdir("files"):
+                    os.mkdir("files")
+                with open(os.path.join("files", filename), 'wb') as f:
+                    f.write(data)
                 
                 time.sleep(1)
         except ssl.SSLCertVerificationError as e:
