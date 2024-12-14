@@ -32,8 +32,8 @@ context.load_cert_chain(certfile=CLIENT_CERT_FILE, keyfile=CLIENT_KEY_FILE)
 
 with socket.create_connection((args.host_address, args.host_port)) as sock:
     try:
-        print("Client: connection established to " + args.host_address + ":" + args.host_port)
-        with context.wrap_socket(sock, server_side=False, server_hostname=args.server_email) as ssock:
+        print("Client: connection established to " + args.host_address + ":" + str(args.host_port))
+        with context.wrap_socket(sock, server_side=False, server_hostname=args.peer_email) as ssock:
             print("Client: connection upgraded to SSL")
             print(ssock.version())
             ssock.do_handshake(block=True)
