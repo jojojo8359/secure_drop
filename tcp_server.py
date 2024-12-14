@@ -1,7 +1,7 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
-from tcp import send_checksum, recv_checksum, gen_shared_bundle
+from tcp import send_checksum, recv_checksum, send_encrypted, recv_encrypted, gen_shared_bundle
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -123,6 +123,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
             
             shared_key = get_shared_key(data_key, peer_data_key_pub)
             print("Shared key: " + shared_key.hex())
+            
+            message = b"hello from the server to the client"
+            try:
+                send_encrypted(conn, message, shared_key)
+            except:
+                conn.shutdown(socket.SHUT_RDWR)
+                print("Server: message: connection dropped by peer, exiting...")
+                sys.exit(1)
             
             time.sleep(1)
         finally:

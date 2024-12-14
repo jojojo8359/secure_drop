@@ -1,7 +1,7 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
-from tcp import send_checksum, recv_checksum, gen_shared_bundle
+from tcp import send_checksum, recv_checksum, send_encrypted, recv_encrypted, gen_shared_bundle
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -116,6 +116,15 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                 
                 shared_key = get_shared_key(data_key, peer_data_key_pub)
                 print("Shared key: " + shared_key.hex())
+                
+                try:
+                    message = recv_encrypted(ssock, shared_key)
+                except:
+                    ssock.shutdown(socket.SHUT_RDWR)
+                    print("Client: message: connection dropped by peer, exiting...")
+                    sys.exit(1)
+                
+                print("Received message: " + str(message))
                 
                 time.sleep(1)
         except ssl.SSLCertVerificationError as e:

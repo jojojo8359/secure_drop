@@ -34,11 +34,16 @@ def user_contact_hash(email: str, password: str, salt: bytes) -> str:
 
 def encrypt(plaintext: str, key: str) -> tuple[bytes, bytes]:
     """Encrypt using AES and a 256-bit key"""
-    cipher_aes = AES.new(bytes.fromhex(key), AES.MODE_SIV)
-    return cipher_aes.encrypt_and_digest(plaintext.encode("utf-8"))
+    return encrypt_b(plaintext.encode("utf-8"), bytes.fromhex(key))
 
+def encrypt_b(data: bytes, key: bytes) -> tuple[bytes, bytes]:
+    cipher_aes = AES.new(key, AES.MODE_SIV)
+    return cipher_aes.encrypt_and_digest(data)
 
 def decrypt(ciphertext: bytes, tag: bytes, key: str) -> str:
     """Decrypt using AES and a 256-bit key"""
-    cipher_aes = AES.new(bytes.fromhex(key), AES.MODE_SIV)
-    return cipher_aes.decrypt_and_verify(ciphertext, tag).decode("utf-8")
+    return decrypt_b(ciphertext, tag, bytes.fromhex(key)).decode("utf-8")
+
+def decrypt_b(ciphertext: bytes, tag: bytes, key: bytes) -> bytes:
+    cipher_aes = AES.new(key, AES.MODE_SIV)
+    return cipher_aes.decrypt_and_verify(ciphertext, tag)
