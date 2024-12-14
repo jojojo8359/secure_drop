@@ -1,7 +1,7 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_bytes_to_pub_key, ec_sign, ec_verify, get_shared_key
-from tcp import send_msg, recv_msg, gen_shared_bundle
+from tcp import send_checksum, recv_checksum, gen_shared_bundle
 import socket, ssl, argparse, sys, time
 from cryptography import x509
 
@@ -67,7 +67,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                 
                 # Sync - receive ready
                 try:
-                    sync_msg = recv_msg(ssock)
+                    sync_msg = recv_checksum(ssock)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
                     print("Client: connection dropped by peer, exiting...")
@@ -80,7 +80,7 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                 
                 # Sync - send ready
                 try:
-                    send_msg(ssock, 'ready'.encode())
+                    send_checksum(ssock, 'ready'.encode())
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
                     print("Client: connection dropped by peer, exiting...")
@@ -88,16 +88,16 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                 
                 # Receive public key signature
                 try:
-                    peer_data_key_pub_sig = recv_msg(ssock)
-                    peer_data_key_pub_bytes = recv_msg(ssock)
+                    peer_data_key_pub_sig = recv_checksum(ssock)
+                    peer_data_key_pub_bytes = recv_checksum(ssock)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
                     print("Client: connection dropped by peer, exiting...")
                     sys.exit(1)
                 
-                if peer_data_key_pub_bytes == None:
+                if peer_data_key_pub_bytes == None or peer_data_key_pub_sig == None:
                     ssock.shutdown(socket.SHUT_RDWR)
-                    print("Client: received data public key corrupted, exiting...")
+                    print("Client: received data corrupted, exiting...")
                     sys.exit(1)
                 
                 peer_data_key_pub = ec_bytes_to_pub_key(peer_data_key_pub_bytes)
@@ -107,8 +107,8 @@ with socket.create_connection((args.host_address, args.host_port)) as sock:
                     sys.exit(1)
                 
                 try:
-                    send_msg(ssock, data_key_pub_sig)
-                    send_msg(ssock, data_key_pub)
+                    send_checksum(ssock, data_key_pub_sig)
+                    send_checksum(ssock, data_key_pub)
                 except:
                     ssock.shutdown(socket.SHUT_RDWR)
                     print("Client: connection dropped by peer, exiting...")
