@@ -4,7 +4,7 @@ import threading
 
 from contacts import decrypt_contacts_file
 from hash import id_hash
-from networking import get_udp_server_socket
+from networking import get_udp_server_socket, receive_file
 from registration import USERS_FILE, register_user, login
 from shell import shell
 from util import get_yes_or_no
@@ -64,15 +64,13 @@ def start() -> None:
                     # user received a file transfer request:
                     if contact_name != '' and mode == 'send':
                         input_prompt = \
-                            f"  Contact '{contact_name} < {contact_email} >' is sending a file. Accept (y/n)? "
+                            f"\n  Contact '{contact_name} < {contact_email} >' is sending a file. Accept (y/n)? "
                         del contact_name, contact_email
                         print(input_prompt)
                         shell_stop_event.set()
                         shell_thread.join()
                         if get_yes_or_no(input_prompt, last_input.last_input):
-                            print("You entered yes.")
-                        else:
-                            print("You entered no.")
+                            receive_file(sender_address)
                         del input_prompt
 
         del user_id, contact_hash

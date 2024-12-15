@@ -61,8 +61,11 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
         udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
 
+        # here we do the sender code
+
     del id_list, addr_list
 
 
-def receive_file() -> None:
+def receive_file(address) -> None:
     pass
+    # here we do the receiver code
