@@ -146,5 +146,6 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
             finally:
                 print("Closed connection.")
                 conn.close()
+                sock.close()
                 os.remove(CLIENT_CERT_FILE)
                 os.remove(CLIENT_KEY_FILE)
