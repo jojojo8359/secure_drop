@@ -42,6 +42,7 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.settimeout(10.0)
         sock.bind((my_ip, 6666))
         sock.listen(2)
         with context.wrap_socket(sock, server_side=True) as ssock:
@@ -51,6 +52,10 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
             except ssl.SSLError as e:
                 print("ERROR: SSL connection failed: " + e.strerror)
                 return
+            except socket.timeout:
+                print("Peer did not connect in time.")
+                return
+            ssock.settimeout(None)
             try:
                 try:
                     conn.do_handshake(block=True)
