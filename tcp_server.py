@@ -134,7 +134,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0) as sock:
                 data = f.read()
             
             try:
-                send_encrypted(conn, filename.encode(), shared_key)
+                send_encrypted(conn, os.path.basename(filename).encode(), shared_key)
                 send_encrypted(conn, data, shared_key)
             except:
                 conn.shutdown(socket.SHUT_RDWR)
