@@ -1,19 +1,13 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
-from tcp import get_local_ip, send_checksum, recv_checksum, send_encrypted, recv_encrypted, gen_shared_bundle
-import socket, ssl, argparse, sys, time, os
+from tcp import get_local_ip, send_checksum, recv_checksum, send_encrypted, gen_shared_bundle
+import socket, ssl, time, os
 from cryptography import x509
 
-# SENDER
-# parser = argparse.ArgumentParser(prog="tcp_server", description="Receive files with encryption and authentication")
-# parser.add_argument('host_address', type=str, help='IP Address of the server to host')
-# parser.add_argument('host_port', type=int, help='Port number of the server to host')
-# parser.add_argument('email', type=str, help='The user\'s email')
-# parser.add_argument('peer_email', type=str, help='The email of the user to connect to')
-# args = parser.parse_args()
 
 def server(my_id: str, peer_id: str, filepath: str) -> None:
+    # TODO: Add documentation
     if not os.path.exists(filepath):
         print("File doesn't exist, exiting...")
         return

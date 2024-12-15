@@ -7,6 +7,7 @@ from Crypto.Hash import SHA3_256
 
 
 def get_local_ip():
+    # TODO: Add documentation
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(0)
     try:

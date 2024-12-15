@@ -12,6 +12,7 @@ import last_input
 
 
 def start() -> None:
+    # TODO: Add documentation
     # if the users file doesn't exist, ask if we want to register a new user to
     # create the file
     if not os.path.exists(USERS_FILE):

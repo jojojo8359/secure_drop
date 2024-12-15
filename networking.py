@@ -45,6 +45,7 @@ def broadcast_id(id_: str, received_list: list[str], addr_list: list, stop_event
 
 
 def get_mutual_contacts_list(id_: str, received_list: list[str], addr_list: list, mode: str) -> None:
+    # TODO: Add documentation
     stop_event = threading.Event()
     thread = threading.Thread(target=broadcast_id, args=(id_, received_list, addr_list, stop_event, mode))
     thread.start()
@@ -54,6 +55,7 @@ def get_mutual_contacts_list(id_: str, received_list: list[str], addr_list: list
 
 
 def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> None:
+    # TODO: Add documentation
     id_list = []
     addr_list = []
     get_mutual_contacts_list(my_id, id_list, addr_list, 'look')
@@ -75,4 +77,5 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
 
 
 def receive_file(my_id: str, target_id: str, address) -> None:
+    # TODO: Add documentation
     client(my_id, target_id, address)

@@ -91,6 +91,7 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
 
 
 def get_contact_id(contact_email: str, contact_hash: str) -> str:
+    # TODO: Add documentation
     contact_info = decrypt_contacts_file(contact_hash)
     ret_val: str = id_hash(contact_email) if contact_email in contact_info else ''
     del contact_info

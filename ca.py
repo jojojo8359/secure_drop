@@ -1,4 +1,4 @@
-from filenames import CA_CERT_FILE, CA_KEY_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
+from filenames import CA_CERT_FILE, CA_KEY_FILE
 from typing import Union
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -10,6 +10,7 @@ import datetime
 CA_CN = "g4_secure_drop"
 
 def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey, rsa.RSAPrivateKey]):
+    # TODO: Add documentation
     with open(filename, "wb") as f:
         f.write(key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -18,6 +19,7 @@ def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey, rsa.R
         ))
 
 def save_cert(filename: str, cert: x509.Certificate):
+    # TODO: Add documentation
     with open(filename, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 

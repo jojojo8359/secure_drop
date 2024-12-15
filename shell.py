@@ -7,6 +7,7 @@ import os
 
 
 def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
+    # TODO: Add documentation
     comm: list[str] = ['']
     while not stop_event.is_set():
         if comm[0] == "add":

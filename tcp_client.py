@@ -1,20 +1,13 @@
 from filenames import CA_CERT_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from ca import save_cert, save_private_key, build_csr, sign_csr, validate_cert
 from ecdh import ec_gen_private_key, ec_bytes_to_pub_key, ec_verify, get_shared_key
-from tcp import send_checksum, recv_checksum, send_encrypted, recv_encrypted, gen_shared_bundle
-import socket, ssl, argparse, sys, time, os
+from tcp import send_checksum, recv_checksum, recv_encrypted, gen_shared_bundle
+import socket, ssl, time, os
 from cryptography import x509
-
-# RECEIVER
-# parser = argparse.ArgumentParser(prog="tcp_client", description="Receive files with encryption and authentication")
-# parser.add_argument('host_address', type=str, help='IP Address of the server to connect to')
-# parser.add_argument('host_port', type=int, help='Port number of the server to connect to')
-# parser.add_argument('email', type=str, help='The user\'s email')
-# parser.add_argument('peer_email', type=str, help='The email of the user to connect to')
-# args = parser.parse_args()
 
 
 def client(my_id: str, peer_id: str, peer_address):
+    # TODO: Add documentation
     signing_key = ec_gen_private_key()
     save_private_key(CLIENT_KEY_FILE, signing_key)
     csr = build_csr(signing_key, my_id)

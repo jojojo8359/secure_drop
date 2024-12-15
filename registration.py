@@ -1,11 +1,13 @@
 import json
 import os
+from typing import Union
 from filenames import USERS_FILE
 from hash import id_hash, get_salt, pass_salt_and_hash, user_contact_hash, encrypt, decrypt
 from util import get_name, get_email, get_password_register, get_password
 
 
 class WrongInfo(Exception):
+    # TODO: Add documentation
     pass
 
 
@@ -43,7 +45,7 @@ def register_user() -> None:
     print("User registered.")
 
 
-def login() -> [str, str]:
+def login() -> Union[str, str]:
     """
     Allows a user to log in.
     

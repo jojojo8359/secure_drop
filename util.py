@@ -3,6 +3,7 @@ from typing import Union
 
 
 def get_yes_or_no(prompt_str: str, first_input: Union[str, None] = None) -> bool:
+    # TODO: Add documentation
     s: str = first_input.strip().lower() if first_input is not None else ''
     while True:
         if s == 'y':
