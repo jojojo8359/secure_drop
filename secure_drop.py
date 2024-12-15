@@ -70,7 +70,11 @@ def start() -> None:
                         shell_stop_event.set()
                         shell_thread.join()
                         if get_yes_or_no(input_prompt, last_input.last_input):
+                            # broadcast a signal saying they do accept file transfer
                             receive_file(sender_address)
+                        else:
+                            # broadcast a signal saying they do not accept file transfer
+                            pass
                         del input_prompt
 
         del user_id, contact_hash
