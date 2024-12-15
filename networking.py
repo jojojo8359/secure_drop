@@ -46,7 +46,7 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
     id_list = []
     addr_list = []
     stop_event = threading.Event()
-    thread = threading.Thread(target=broadcast_id, args=(my_id, id_list, addr_list, stop_event, 'ping'))
+    thread = threading.Thread(target=broadcast_id, args=(my_id, id_list, addr_list, stop_event, 'look'))
     thread.start()
     time.sleep(1)
     stop_event.set()
@@ -58,7 +58,7 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
         target_address = addr_list[id_list.index(target_id)]
 
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        udp_socket.bind((SERVER_IP, PORT))
+        udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
 
     del id_list, addr_list
