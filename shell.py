@@ -21,16 +21,19 @@ def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
         elif comm[0] == "exit":
             break
         elif comm[0] == "send":
-            receiver_id: str = get_contact_id(comm[1], contact_hash)
-            if receiver_id == '':
-                print(f"Contact < {comm[1]} > not found.")
+            if len(comm) != 2:
+                print("send command should be used as follows: \"send <email> <filepath>\"")
             else:
-                file_path = comm[2]
-                if not os.path.exists(file_path) or not os.access(file_path, os.R_OK):
-                    print("File " + file_path + " doesn't exist!")
+                receiver_id: str = get_contact_id(comm[1], contact_hash)
+                if receiver_id == '':
+                    print(f"Contact < {comm[1]} > not found.")
                 else:
-                    # TODO: Check file size too
-                    send_file(user_id, receiver_id, comm[1], file_path)
+                    file_path = comm[2]
+                    if not os.path.exists(file_path) or not os.access(file_path, os.R_OK):
+                        print("File " + file_path + " doesn't exist!")
+                    else:
+                        # TODO: Check file size too
+                        send_file(user_id, receiver_id, comm[1], file_path)
         elif comm[0] == "":
             pass
         else:

@@ -51,8 +51,6 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                 print("ERROR: SSL connection failed: " + e.strerror)
                 return
             try:
-                print(str(addr) + " connected")
-                
                 try:
                     conn.do_handshake(block=True)
                 except:
@@ -123,6 +121,8 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                     return
                 
                 shared_key = get_shared_key(data_key, peer_data_key_pub)
+                
+                print("Secure connection established.")
                 
                 if not os.path.exists(filepath):
                     conn.shutdown(socket.SHUT_RDWR)

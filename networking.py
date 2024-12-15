@@ -70,13 +70,9 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
-
-    print("I am opening a TCP server now")
     
     server(my_id, target_id, file_path)
 
 
 def receive_file(my_id: str, target_id: str, address) -> None:
-    print("I am opening a TCP client now")
-    
     client(my_id, target_id, address)

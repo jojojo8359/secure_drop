@@ -38,7 +38,6 @@ def client(my_id: str, peer_id: str, peer_address):
             try:
                 with context.wrap_socket(sock, server_side=False, server_hostname=peer_id) as ssock:
                     print("Connection upgraded to SSL.")
-                    print(ssock.version())
                     
                     try:
                         ssock.do_handshake(block=True)
@@ -110,6 +109,8 @@ def client(my_id: str, peer_id: str, peer_address):
                         return
                     
                     shared_key = get_shared_key(data_key, peer_data_key_pub)
+                    
+                    print("Secure connection established.")
                     
                     try:
                         filename = recv_encrypted(ssock, shared_key).decode()
