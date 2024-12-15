@@ -34,7 +34,7 @@ Adding a contact will require a contact name (or nickname, which can be overwrit
 
 Listing online contacts will only display 1. contacts that are in the current user's list of contacts, 2. currently online and running the secure_drop shell, and 3. have the user also added as one of their own contacts.
 
-Sending a file requires a contact email and file path, which points to a valid file to securely transfer to the contact. When sending a file to a valid contact, a notification will appear in the recipient's shell asking them to approve the transfer. This notification will stay valid for 10 seconds. If approved, the file will be sent to the contact, and if denied, the file transfer will not take place.
+Sending a file requires a contact email and file path, which points to a valid file to securely transfer to the contact. When sending a file to a valid contact, a notification will appear in the recipient's shell asking them to approve the transfer. This notification will stay valid for 10 seconds. If approved, the file will be sent to the contact, and if denied, the file transfer will not take place. All successfully transferred files will save to a folder named `files/` on the recipient's machine.
 
 ## CA
 
