@@ -1,9 +1,22 @@
-import struct, ssl
+import struct, ssl, socket
 from typing import Union
 from ecdh import ec_gen_private_key, ec_pub_key_to_bytes, ec_sign
 from hash import encrypt_b, decrypt_b
 from cryptography.hazmat.primitives.asymmetric import ec
 from Crypto.Hash import SHA3_256
+
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.settimeout(0)
+    try:
+        s.connect(('10.254.254.254', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 
 def send_msg(sock: ssl.SSLSocket, msg: bytes) -> None:

@@ -66,12 +66,12 @@ def start() -> None:
                         input_prompt = \
                             f"\n  Contact '{contact_name} < {contact_email} >' is sending a file. Accept (y/n)? "
                         del contact_name, contact_email
-                        print(input_prompt)
+                        print(input_prompt, end='')
                         shell_stop_event.set()
                         shell_thread.join()
                         if get_yes_or_no(input_prompt, last_input.last_input):
                             # broadcast a signal saying they do accept file transfer
-                            receive_file(sender_address)
+                            receive_file(user_id, received_id, sender_address[0])
                         else:
                             # broadcast a signal saying they do not accept file transfer
                             pass

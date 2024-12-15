@@ -1,6 +1,8 @@
 import socket
 import threading
 import time
+from tcp_server import server
+from tcp_client import client
 
 
 SERVER_IP = "0.0.0.0"
@@ -58,18 +60,19 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
 
     if target_id not in id_list:
         print(f"Contact < {target_email} > not found.")
-    else:
-        target_address = addr_list[id_list.index(target_id)]
-
-        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-        udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
-
-        # here we do the sender code
+        del id_list, addr_list
+        return
+    
+    target_address = addr_list[id_list.index(target_id)]
 
     del id_list, addr_list
+    
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
+    
+    server(my_id, target_id, file_path)
 
 
-def receive_file(address) -> None:
-    pass
-    # here we do the receiver code
+def receive_file(my_id: str, target_id: str, address) -> None:
+    client(my_id, target_id, address)

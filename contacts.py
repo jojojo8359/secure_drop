@@ -37,7 +37,7 @@ def decrypt_contacts_file(key: str) -> dict[str, str]:
     return json.loads(decrypt(ciphertext, tag, key))
 
 
-def add_contact(contact_hash: str) -> None:
+def add_contact(contact_hash: str, user_id: str) -> None:
     """
     Adds a contact to the list of contacts.
     
@@ -45,8 +45,16 @@ def add_contact(contact_hash: str) -> None:
     current user's (now encrypted) credentials.
     """
     contacts: dict = decrypt_contacts_file(contact_hash) if os.path.exists(CONTACTS_FILE) else {}
-    contacts[get_email()] = get_name()
+    name = get_name()
+    email = get_email()
+    if id_hash(email) == user_id:
+        print("Cannot add yourself as a contact.")
+        del email, name, contacts
+        return
+    contacts[email] = name
+    del email, name
     encrypt_contacts_file(contacts, contact_hash)
+    del contacts
     print("Contact added.")
 
 
