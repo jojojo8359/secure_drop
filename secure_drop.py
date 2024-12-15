@@ -4,7 +4,7 @@ import threading
 
 from contacts import decrypt_contacts_file
 from hash import id_hash
-from networking import get_udp_server_socket
+from networking import get_udp_server_socket, receive_file
 from registration import USERS_FILE, register_user, login
 from shell import shell
 from util import get_yes_or_no
@@ -40,14 +40,38 @@ def start() -> None:
                 except socket.timeout:
                     continue
                 else:
+                    # received data from socket
                     data = data.decode('utf-8')
+                    received_id: str = data[:-4]
+                    mode: str = data[-4:]
+                    contact_name: str = ''
+                    contact_email: str = ''
 
                     contacts_list: dict[str, str] = decrypt_contacts_file(contact_hash)
                     for contact in contacts_list:
-                        if data == id_hash(contact):
+                        if received_id == id_hash(contact):
                             udp_server_socket.sendto(user_id.encode('utf-8'), sender_address)
+                            contact_email = contact
+                            contact_name = contacts_list[contact]
+                            if mode == 'send':
+                                contact_email = contact
+                                contact_name = contacts_list[contact]
+                            else:
+                                del contacts_list, sender_address
+                            del data
                             break
-                    del contacts_list
+
+                    # user received a file transfer request:
+                    if contact_name != '' and mode == 'send':
+                        input_prompt = \
+                            f"\n  Contact '{contact_name} < {contact_email} >' is sending a file. Accept (y/n)? "
+                        del contact_name, contact_email
+                        print(input_prompt)
+                        shell_stop_event.set()
+                        shell_thread.join()
+                        if get_yes_or_no(input_prompt, last_input.last_input):
+                            receive_file(sender_address)
+                        del input_prompt
 
         del user_id, contact_hash
 
