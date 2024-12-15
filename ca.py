@@ -276,3 +276,6 @@ def validate_cert(cert: x509.Certificate, id: str) -> bool:
         print("CA: Certificate does not belong to expected user (id unexpected).")
         return False
     return True
+
+if __name__ == '__main__':
+    gen_ca()
