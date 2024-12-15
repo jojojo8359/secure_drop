@@ -21,7 +21,7 @@ def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
         elif comm[0] == "exit":
             break
         elif comm[0] == "send":
-            if len(comm) != 2:
+            if len(comm) != 3:
                 print("send command should be used as follows: \"send <email> <filepath>\"")
             else:
                 receiver_id: str = get_contact_id(comm[1], contact_hash)
