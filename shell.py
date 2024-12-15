@@ -32,6 +32,8 @@ def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
                     file_path = comm[2]
                     if not os.path.exists(file_path) or not os.access(file_path, os.R_OK):
                         print("File " + file_path + " doesn't exist!")
+                    elif os.path.isdir(file_path):
+                        print(file_path + " is a directory, not a file!")
                     else:
                         if os.stat(file_path).st_size >= 4294967290:
                             print("File " + file_path + " is too large! (Max = 4GiB)")
