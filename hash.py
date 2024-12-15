@@ -1,11 +1,11 @@
 from Crypto.Cipher import AES
-from Crypto.Hash import SHA3_256, SHA512
+from Crypto.Hash import SHA3_224, SHA512
 import Crypto.Random
 
 
 def id_hash(email: str) -> str:
     """Creates an ID hash (hex) from an email string"""
-    id_hash_ = SHA3_256.new()
+    id_hash_ = SHA3_224.new()
     id_hash_.update(bytearray(email, "utf-8"))
     return id_hash_.hexdigest()
 
