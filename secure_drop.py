@@ -63,12 +63,12 @@ def start() -> None:
 
                     # user received a file transfer request:
                     if contact_name != '' and mode == 'send':
-                        shell_stop_event.set()
-                        shell_thread.join()
                         input_prompt = \
                             f"  Contact '{contact_name} < {contact_email} >' is sending a file. Accept (y/n)? "
                         del contact_name, contact_email
                         print(input_prompt)
+                        shell_stop_event.set()
+                        shell_thread.join()
                         if get_yes_or_no(input_prompt, last_input.last_input):
                             print("You entered yes.")
                         else:
