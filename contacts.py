@@ -1,11 +1,9 @@
 import json
 import os
-import threading
-import time
 
 from filenames import CONTACTS_FILE
 from hash import encrypt, decrypt, id_hash
-from networking import broadcast_id
+from networking import get_mutual_contacts_list
 from util import get_name, get_email
 
 
@@ -66,12 +64,7 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
         received_list: list[str] = []  # will have a list of hashed emails
 
         # run thread for 1 second to see online contacts
-        stop_event = threading.Event()
-        thread = threading.Thread(target=broadcast_id, args=(user_id, received_list, [], stop_event, 'look'))
-        thread.start()
-        time.sleep(1)
-        stop_event.set()
-        thread.join()
+        get_mutual_contacts_list(user_id, received_list, [], 'ping')
 
         # get responses from everyone, I will get their ID back if I am in their contact
         # Go through my contacts, match IDs I get back against theirs, list them if matches

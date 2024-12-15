@@ -42,15 +42,19 @@ def broadcast_id(id_: str, received_list: list[str], addr_list: list, stop_event
     broadcast_socket.close()
 
 
-def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> None:
-    id_list = []
-    addr_list = []
+def get_mutual_contacts_list(id_: str, received_list: list[str], addr_list: list, mode: str) -> None:
     stop_event = threading.Event()
-    thread = threading.Thread(target=broadcast_id, args=(my_id, id_list, addr_list, stop_event, 'look'))
+    thread = threading.Thread(target=broadcast_id, args=(id_, received_list, addr_list, stop_event, mode))
     thread.start()
     time.sleep(1)
     stop_event.set()
     thread.join()
+
+
+def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> None:
+    id_list = []
+    addr_list = []
+    get_mutual_contacts_list(my_id, id_list, addr_list, 'look')
 
     if target_id not in id_list:
         print(f"Contact < {target_email} > not found.")
