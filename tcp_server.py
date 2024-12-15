@@ -14,6 +14,10 @@ from cryptography import x509
 # args = parser.parse_args()
 
 def server(my_id: str, peer_id: str, filepath: str) -> None:
+    if not os.path.exists(filepath):
+        print("File doesn't exist, exiting...")
+        return
+    
     my_ip = get_local_ip()
     
     signing_key = ec_gen_private_key()
@@ -40,7 +44,7 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
         sock.bind((my_ip, 6666))
         sock.listen(5)
         with context.wrap_socket(sock, server_side=True) as ssock:
-            print("Server: waiting for connection")
+            print("Waiting for peer to accept...")
             try:
                 conn, addr = ssock.accept()
             except ssl.SSLError as e:
@@ -52,23 +56,21 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                 try:
                     conn.do_handshake(block=True)
                 except:
-                    # conn.shutdown(socket.SHUT_RDWR)
                     print("Server: handshake: connection dropped by peer, exiting...")
                     return
                 
-                print("Server: handshake done")
+                print("Peer connected.")
                 
                 try:
                     peer_cert_der = conn.getpeercert(binary_form=True)
                 except:
-                    # conn.shutdown(socket.SHUT_RDWR)
                     print("Server: peer cert: connection dropped by peer, exiting...")
                     return
                 
                 
                 peer_cert = x509.load_der_x509_certificate(peer_cert_der)
                 if validate_cert(peer_cert, peer_id):
-                    print("Server: successfully validated client certificate!")
+                    print("Validated peer identity!")
                 else:
                     print("Server: couldn't validate client certificate! Closing connection...")
                     conn.shutdown(socket.SHUT_RDWR)
@@ -80,7 +82,6 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                 try:
                     send_checksum(conn, 'ready'.encode())
                 except:
-                    # conn.shutdown(socket.SHUT_RDWR)
                     print("Server: s-sync: connection dropped by peer, exiting...")
                     return
                 
@@ -88,7 +89,6 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                 try:
                     sync_msg = recv_checksum(conn)
                 except:
-                    # conn.shutdown(socket.SHUT_RDWR)
                     print("Server: r-sync: connection dropped by peer, exiting...")
                     return
 
@@ -101,7 +101,6 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                     send_checksum(conn, data_key_pub_sig)
                     send_checksum(conn, data_key_pub)
                 except:
-                    # conn.shutdown(socket.SHUT_RDWR)
                     print("Server: s-key: connection dropped by peer, exiting...")
                     return
                 
@@ -109,7 +108,6 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                     peer_data_key_pub_sig = recv_checksum(conn)
                     peer_data_key_pub_bytes = recv_checksum(conn)
                 except:
-                    # conn.shutdown(socket.SHUT_RDWR)
                     print("Server: r-key: connection dropped by peer, exiting...")
                     return
                 
@@ -125,9 +123,7 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                     return
                 
                 shared_key = get_shared_key(data_key, peer_data_key_pub)
-                print("Shared key: " + shared_key.hex())
                 
-                # filename = input("Choose a file to transfer: ").strip()
                 if not os.path.exists(filepath):
                     conn.shutdown(socket.SHUT_RDWR)
                     print("File doesn't exist, exiting...")
@@ -143,13 +139,12 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
                     send_encrypted(conn, data, shared_key)
                     print("File sent!")
                 except:
-                    conn.shutdown(socket.SHUT_RDWR)
                     print("Server: file: connection dropped by peer, exiting...")
-                    sys.exit(1)
+                    return
                 
                 time.sleep(1)
             finally:
-                print("Server: connection closed")
+                print("Closed connection.")
                 conn.close()
                 os.remove(CLIENT_CERT_FILE)
                 os.remove(CLIENT_KEY_FILE)

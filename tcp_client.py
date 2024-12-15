@@ -21,11 +21,11 @@ def client(my_id: str, peer_id: str, peer_address):
     cert = sign_csr(csr)
     del csr
     if cert == None:
-        print("Couldn't generate a certificate for server")
+        print("Couldn't generate a certificate for client")
         del cert
         return
     if not validate_cert(cert, my_id):
-        print("Coudln't validate certificate for server")
+        print("Coudln't validate certificate for client")
         del cert
         return
     save_cert(CLIENT_CERT_FILE, cert)
@@ -35,31 +35,28 @@ def client(my_id: str, peer_id: str, peer_address):
 
     with socket.create_connection((peer_address, 6666)) as sock:
         try:
-            print("Client: connection established to " + peer_address + ":" + "6666")
             try:
                 with context.wrap_socket(sock, server_side=False, server_hostname=peer_id) as ssock:
-                    print("Client: connection upgraded to SSL")
+                    print("Connection upgraded to SSL.")
                     print(ssock.version())
                     
                     try:
                         ssock.do_handshake(block=True)
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: handshake: connection dropped by peer, exiting...")
                         return
                     
-                    print("Client: handshake done")
+                    print("Connected to peer.")
                     
                     try:
                         peer_cert_der = ssock.getpeercert(binary_form=True)
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: peer cert: connection dropped by peer, exiting...")
                         return
                     
                     peer_cert = x509.load_der_x509_certificate(peer_cert_der)
                     if validate_cert(peer_cert, peer_id):
-                        print("Client: successfully validated server certificate!")
+                        print("Validated peer identity!")
                     else:
                         print("Client: couldn't validate server certificate! Closing connection...")
                         ssock.shutdown(socket.SHUT_RDWR)
@@ -71,7 +68,6 @@ def client(my_id: str, peer_id: str, peer_address):
                     try:
                         sync_msg = recv_checksum(ssock)
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: r-sync: connection dropped by peer, exiting...")
                         return
                     
@@ -84,7 +80,6 @@ def client(my_id: str, peer_id: str, peer_address):
                     try:
                         send_checksum(ssock, 'ready'.encode())
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: s-sync: connection dropped by peer, exiting...")
                         return
                     
@@ -93,7 +88,6 @@ def client(my_id: str, peer_id: str, peer_address):
                         peer_data_key_pub_sig = recv_checksum(ssock)
                         peer_data_key_pub_bytes = recv_checksum(ssock)
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: r-key: connection dropped by peer, exiting...")
                         return
                     
@@ -112,19 +106,16 @@ def client(my_id: str, peer_id: str, peer_address):
                         send_checksum(ssock, data_key_pub_sig)
                         send_checksum(ssock, data_key_pub)
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: s-key: connection dropped by peer, exiting...")
                         return
                     
                     shared_key = get_shared_key(data_key, peer_data_key_pub)
-                    print("Shared key: " + shared_key.hex())
                     
                     try:
                         filename = recv_encrypted(ssock, shared_key).decode()
                         print("Receiving file...")
                         data = recv_encrypted(ssock, shared_key)
                     except:
-                        # ssock.shutdown(socket.SHUT_RDWR)
                         print("Client: data: connection dropped by peer, exiting...")
                         return
                     
@@ -140,7 +131,7 @@ def client(my_id: str, peer_id: str, peer_address):
                 print("ERROR: SSL connection failed due to certificate verification: " + e.strerror)
                 return
         finally:
-            print("Client: connection closed")
+            print("Connection closed.")
             sock.close()
             os.remove(CLIENT_CERT_FILE)
             os.remove(CLIENT_KEY_FILE)
