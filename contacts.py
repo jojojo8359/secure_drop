@@ -67,7 +67,7 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
 
         # run thread for 1 second to see online contacts
         stop_event = threading.Event()
-        thread = threading.Thread(target=broadcast_id, args=(user_id, received_list, stop_event, 'ping'))
+        thread = threading.Thread(target=broadcast_id, args=(user_id, received_list, [], stop_event, 'look'))
         thread.start()
         time.sleep(1)
         stop_event.set()
@@ -87,3 +87,10 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
         del output
 
     del contacts
+
+
+def get_contact_id(contact_email: str, contact_hash: str) -> str:
+    contact_info = decrypt_contacts_file(contact_hash)
+    ret_val: str = id_hash(contact_email) if contact_email in contact_info else ''
+    del contact_info
+    return ret_val
