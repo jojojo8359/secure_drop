@@ -47,7 +47,7 @@ def login() -> [str, str]:
     """
     Allows a user to log in.
     
-    Returns a user's id (hashed email) contact hash (combination of their email and password) after they sign in.
+    Returns a user's id (hashed email) and contact hash (combination of their email and password) after they sign in.
     """
     with open(USERS_FILE, 'r') as f:
         contents: dict[str, str] = json.load(f)

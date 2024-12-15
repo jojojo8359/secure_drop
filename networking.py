@@ -1,6 +1,8 @@
 import socket
 import threading
 import time
+from tcp_server import server
+from tcp_client import client
 
 
 SERVER_IP = "0.0.0.0"
@@ -69,12 +71,12 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
 
-    # here we do the sender code
-    
     print("I am opening a TCP server now")
+    
+    server(my_id, target_id, file_path)
 
 
-
-def receive_file(address) -> None:
-    # here we do the receiver code
+def receive_file(my_id: str, target_id: str, address) -> None:
     print("I am opening a TCP client now")
+    
+    client(my_id, target_id, address)

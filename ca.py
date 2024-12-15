@@ -60,13 +60,12 @@ def gen_ca():
     save_cert(CA_CERT_FILE, cert)
 
 
-def build_csr(private_key: ec.EllipticCurvePrivateKey, email: str) -> x509.CertificateSigningRequest:
+def build_csr(private_key: ec.EllipticCurvePrivateKey, id: str) -> x509.CertificateSigningRequest:
     """
-    Build a Certificate Signing Request from an EC private key and a user's email.
+    Build a Certificate Signing Request from an EC private key and a user's id.
     """
     csr = x509.CertificateSigningRequestBuilder().subject_name(x509.Name([
-        x509.NameAttribute(NameOID.COMMON_NAME, email),
-        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
+        x509.NameAttribute(NameOID.COMMON_NAME, id),
     ])).add_extension(
         x509.BasicConstraints(ca=False, path_length=None),
         critical=True
@@ -172,20 +171,13 @@ def verify_ca_cert(ca_cert: x509.Certificate) -> bool:
 
 def verify_csr(csr: x509.CertificateSigningRequest) -> bool:
     """
-    Verify if a CSR: has one CN, has one email, and the CN and email match.
+    Verify if a CSR: has one CN.
     
     If all these checks pass, returns True. Otherwise, returns False.
     """
     subject_common_names = csr.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     if len(subject_common_names) != 1:
         print("CA: CSR does not have exactly one subject common name.")
-        return False
-    subject_emails = csr.subject.get_attributes_for_oid(NameOID.EMAIL_ADDRESS)
-    if len(subject_emails) != 1:
-        print("CA: CSR does not have exactly one subject email address.")
-        return False
-    if subject_common_names[0].value != subject_emails[0].value:
-        print("CA: CSR has mismatching common name and email address.")
         return False
     return True
 
@@ -229,7 +221,7 @@ def sign_csr(csr: x509.CertificateSigningRequest) -> Union[x509.Certificate, Non
     return cert
 
 
-def validate_cert(cert: x509.Certificate, email: str) -> bool:
+def validate_cert(cert: x509.Certificate, id: str) -> bool:
     """
     Validates a certificate by:
     - Checking if it's signed by the CA (based on cert and key)
@@ -278,14 +270,7 @@ def validate_cert(cert: x509.Certificate, email: str) -> bool:
     if len(subject_common_names) != 1:
         print("CA: Certificate does not have exactly one subject common name.")
         return False
-    subject_emails = cert.subject.get_attributes_for_oid(NameOID.EMAIL_ADDRESS)
-    if len(subject_emails) != 1:
-        print("CA: Certificate does not have exactly one subject email address.")
-        return False
-    if subject_common_names[0].value != subject_emails[0].value:
-        print("CA: Certificate has mismatching common name and email address.")
-        return False
-    if subject_common_names[0].value != email and subject_emails[0].value != email:
-        print("CA: Certificate does not belong to expected user (email unexpected).")
+    if subject_common_names[0].value != id:
+        print("CA: Certificate does not belong to expected user (id unexpected).")
         return False
     return True
