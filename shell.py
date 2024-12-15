@@ -10,7 +10,7 @@ def shell(contact_hash: str, user_id: str, stop_event: threading.Event) -> None:
     comm: list[str] = ['']
     while not stop_event.is_set():
         if comm[0] == "add":
-            add_contact(contact_hash)
+            add_contact(contact_hash, user_id)
         elif comm[0] == "list":
             list_contacts(contact_hash, user_id)
         elif comm[0] == "help":
