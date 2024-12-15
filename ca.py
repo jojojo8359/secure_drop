@@ -1,4 +1,4 @@
-from filenames import CA_CERT_FILE, CA_KEY_FILE
+from filenames import CA_CERT_FILE, CA_KEY_FILE, CLIENT_CERT_FILE, CLIENT_KEY_FILE
 from typing import Union
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature
@@ -9,18 +9,25 @@ import datetime
 
 CA_CN = "g4_secure_drop"
 
+def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey, rsa.RSAPrivateKey]):
+    with open(filename, "wb") as f:
+        f.write(key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        ))
+
+def save_cert(filename: str, cert: x509.Certificate):
+    with open(filename, "wb") as f:
+        f.write(cert.public_bytes(serialization.Encoding.PEM))
+
 def gen_ca():
     """
     Generate new CA files on disk (private key: \"ca.key\" & certificate: \"ca.cert\").
     The certificate is valid for 30 days.
     """
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    with open(CA_KEY_FILE, "wb") as f:
-        f.write(key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        ))
+    save_private_key(CA_KEY_FILE, key)
     # Since we're self-signing, subject = issuer
     subject = issuer = x509.Name([
         # The only field we really care about here is a unique CA name
@@ -50,8 +57,7 @@ def gen_ca():
         x509.BasicConstraints(ca=True, path_length=None),
         critical=True
     ).sign(key, hashes.SHA256(), rsa_padding=padding.PKCS1v15())
-    with open(CA_CERT_FILE, "wb") as f:
-        f.write(cert.public_bytes(serialization.Encoding.PEM))
+    save_cert(CA_CERT_FILE, cert)
 
 
 def build_csr(private_key: ec.EllipticCurvePrivateKey, email: str) -> x509.CertificateSigningRequest:
