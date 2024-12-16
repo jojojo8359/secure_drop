@@ -33,19 +33,34 @@ def user_contact_hash(email: str, password: str, salt: bytes) -> str:
 
 
 def encrypt(plaintext: str, key: str) -> tuple[bytes, bytes]:
-    """Encrypt using AES and a 256-bit key. String version of the AES encryption functions."""
+    """
+    Encrypt using AES and a 256-bit key. String version of the AES encryption
+    functions.
+    """
     return encrypt_b(plaintext.encode("utf-8"), bytes.fromhex(key))
 
+
 def encrypt_b(data: bytes, key: bytes) -> tuple[bytes, bytes]:
-    """Encrypt using AES and a 256-bit key. Bytes version of the AES encryption functions."""
+    """
+    Encrypt using AES and a 256-bit key. Bytes version of the AES encryption
+    functions.
+    """
     cipher_aes = AES.new(key, AES.MODE_SIV)
     return cipher_aes.encrypt_and_digest(data)
 
+
 def decrypt(ciphertext: bytes, tag: bytes, key: str) -> str:
-    """Decrypt using AES and a 256-bit key. String version of the AES decryption functions."""
+    """
+    Decrypt using AES and a 256-bit key. String version of the AES decryption
+    functions.
+    """
     return decrypt_b(ciphertext, tag, bytes.fromhex(key)).decode("utf-8")
 
+
 def decrypt_b(ciphertext: bytes, tag: bytes, key: bytes) -> bytes:
-    """Decrypt using AES and a 256-bit key. Bytes version of the AES decryption functions."""
+    """
+    Decrypt using AES and a 256-bit key. Bytes version of the AES decryption
+    functions.
+    """
     cipher_aes = AES.new(key, AES.MODE_SIV)
     return cipher_aes.decrypt_and_verify(ciphertext, tag)

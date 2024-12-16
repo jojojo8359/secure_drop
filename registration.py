@@ -2,7 +2,8 @@ import json
 import os
 from typing import Union
 from filenames import USERS_FILE
-from hash import id_hash, get_salt, pass_salt_and_hash, user_contact_hash, encrypt, decrypt
+from hash import id_hash, get_salt, pass_salt_and_hash, user_contact_hash, \
+    encrypt, decrypt
 from util import get_name, get_email, get_password_register, get_password
 
 
@@ -14,7 +15,7 @@ class WrongInfo(Exception):
 def register_user() -> None:
     """
     Register a new user by prompting for their name, email, and password.
-    
+
     Updates the users file with their encrypted information.
     """
     print('')
@@ -29,7 +30,9 @@ def register_user() -> None:
     contact_hash: str = user_contact_hash(email, password, salt)
     password_hash: str = pass_salt_and_hash(password, salt)
 
-    user_info, tag = encrypt(json.dumps({'name': name, 'id': id_, 'password': password_hash}), contact_hash)
+    user_info, tag = encrypt(json.dumps({'name': name, 'id': id_,
+                                         'password': password_hash}),
+                             contact_hash)
 
     # Write output to user JSON file
     with open(USERS_FILE, 'w') as f:
@@ -48,8 +51,9 @@ def register_user() -> None:
 def login() -> Union[str, str]:
     """
     Allows a user to log in.
-    
-    Returns a user's id (hashed email) and contact hash (combination of their email and password) after they sign in.
+
+    Returns a user's id (hashed email) and contact hash (combination of their
+    email and password) after they sign in.
     """
     with open(USERS_FILE, 'r') as f:
         contents: dict[str, str] = json.load(f)
@@ -67,7 +71,8 @@ def login() -> Union[str, str]:
 
         try:
             user_info = json.loads(decrypt(encr_user_info, tag, contact_hash))
-            if id_ != user_info['id'] or password_hash != user_info['password']:
+            if id_ != user_info['id'] or \
+                    password_hash != user_info['password']:
                 raise WrongInfo
         except Exception:
             # if given wrong email and password json decoder will fail
@@ -82,5 +87,6 @@ def login() -> Union[str, str]:
             del email
             del password
             del password_hash
-            print(f"Username and Password verified. Welcome, {user_info['name']}.")
+            print(f"Username and Password verified. Welcome, "
+                  f"{user_info['name']}.")
             return id_, contact_hash

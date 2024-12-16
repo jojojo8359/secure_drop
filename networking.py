@@ -19,11 +19,14 @@ def get_udp_server_socket() -> socket.socket:
     return udp_socket
 
 
-def broadcast_id(id_: str, received_list: list[str], addr_list: list, stop_event: threading.Event, mode: str) -> None:
+def broadcast_id(id_: str, received_list: list[str], addr_list: list,
+                 stop_event: threading.Event, mode: str) -> None:
     """
-    Broadcasts user ID via UDP, appends any user which had the ID in their contacts to received_list
+    Broadcasts user ID via UDP, appends any user which had the ID in their
+    contacts to received_list
 
-    mode: ping (see which contacts are online) or send (want to send file to a specific user)
+    mode: ping (see which contacts are online) or send (want to send file to a
+    specific user)
     """
 
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -44,17 +47,21 @@ def broadcast_id(id_: str, received_list: list[str], addr_list: list, stop_event
     broadcast_socket.close()
 
 
-def get_mutual_contacts_list(id_: str, received_list: list[str], addr_list: list, mode: str) -> None:
+def get_mutual_contacts_list(id_: str, received_list: list[str],
+                             addr_list: list, mode: str) -> None:
     # TODO: Add documentation
     stop_event = threading.Event()
-    thread = threading.Thread(target=broadcast_id, args=(id_, received_list, addr_list, stop_event, mode))
+    thread = threading.Thread(target=broadcast_id,
+                              args=(id_, received_list, addr_list, stop_event,
+                                    mode))
     thread.start()
     time.sleep(1)
     stop_event.set()
     thread.join()
 
 
-def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> None:
+def send_file(my_id: str, target_id: str, target_email: str, file_path: str) \
+        -> None:
     # TODO: Add documentation
     id_list = []
     addr_list = []
@@ -64,15 +71,15 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) -> 
         print(f"Contact < {target_email} > not found.")
         del id_list, addr_list
         return
-    
+
     target_address = addr_list[id_list.index(target_id)]
 
     del id_list, addr_list
-    
+
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     udp_socket.sendto((my_id+'send').encode('utf-8'), target_address)
-    
+
     server(my_id, target_id, file_path)
 
 

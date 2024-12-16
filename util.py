@@ -2,7 +2,8 @@ from getpass import getpass
 from typing import Union
 
 
-def get_yes_or_no(prompt_str: str, first_input: Union[str, None] = None) -> bool:
+def get_yes_or_no(prompt_str: str, first_input: Union[str, None] = None) \
+        -> bool:
     # TODO: Add documentation
     s: str = first_input.strip().lower() if first_input is not None else ''
     while True:
@@ -16,9 +17,10 @@ def get_yes_or_no(prompt_str: str, first_input: Union[str, None] = None) -> bool
 def get_nonempty_input(prompt_str: str, reprompt_str: str) -> str:
     """
     Gets a non-empty string as input from the user.
-    
-    Uses prompt_str as the string to prompt the user for input, and reprompt_str
-    as the string to re-prompt the user for input after empty input is entered.
+
+    Uses prompt_str as the string to prompt the user for input, and
+    reprompt_str as the string to re-prompt the user for input after empty
+    input is entered.
     """
     while True:
         s: str = input(prompt_str).strip()
@@ -35,7 +37,8 @@ def get_name() -> str:
 
 def get_email() -> str:
     """Prompts the user for an email address."""
-    return get_nonempty_input("Enter Email Address: ", "Please enter an email.")
+    return get_nonempty_input("Enter Email Address: ",
+                              "Please enter an email.")
 
 
 def get_password_register() -> str:

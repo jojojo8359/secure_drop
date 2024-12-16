@@ -9,7 +9,9 @@ import datetime
 
 CA_CN = "g4_secure_drop"
 
-def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey, rsa.RSAPrivateKey]):
+
+def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey,
+                                               rsa.RSAPrivateKey]):
     # TODO: Add documentation
     with open(filename, "wb") as f:
         f.write(key.private_bytes(
@@ -18,14 +20,17 @@ def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey, rsa.R
             encryption_algorithm=serialization.NoEncryption()
         ))
 
+
 def save_cert(filename: str, cert: x509.Certificate):
     # TODO: Add documentation
     with open(filename, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
+
 def gen_ca():
     """
-    Generate new CA files on disk (private key: \"ca.key\" & certificate: \"ca.cert\").
+    Generate new CA files on disk (private key: \"ca.key\" & certificate:
+    \"ca.cert\").
     The certificate is valid for 30 days.
     """
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -47,9 +52,11 @@ def gen_ca():
         datetime.datetime.now(datetime.timezone.utc)
     ).not_valid_after(
         # Sign the certificate for 30 days
-        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=30)
+        datetime.datetime.now(datetime.timezone.utc) +
+        datetime.timedelta(days=30)
     ).add_extension(
-        # Add a Subject Key Identifier and Authority Key Identifier, since a CA certificate can be re-generated with the same CN
+        # Add a Subject Key Identifier and Authority Key Identifier, since a
+        # CA certificate can be re-generated with the same CN
         x509.SubjectKeyIdentifier.from_public_key(key.public_key()),
         critical=False
     ).add_extension(
@@ -62,7 +69,8 @@ def gen_ca():
     save_cert(CA_CERT_FILE, cert)
 
 
-def build_csr(private_key: ec.EllipticCurvePrivateKey, id: str) -> x509.CertificateSigningRequest:
+def build_csr(private_key: ec.EllipticCurvePrivateKey,
+              id: str) -> x509.CertificateSigningRequest:
     """
     Build a Certificate Signing Request from an EC private key and a user's id.
     """
@@ -78,8 +86,9 @@ def build_csr(private_key: ec.EllipticCurvePrivateKey, id: str) -> x509.Certific
 def load_ca_key() -> Union[rsa.RSAPrivateKey, None]:
     """
     Load the CA's key from disk.
-    
-    If the key isn't an RSA private key, returns None. Otherwise, returns the RSA private key.
+
+    If the key isn't an RSA private key, returns None. Otherwise, returns the
+    RSA private key.
     """
     with open(CA_KEY_FILE, "rb") as f:
         ca_key = serialization.load_pem_private_key(
@@ -92,7 +101,8 @@ def load_ca_key() -> Union[rsa.RSAPrivateKey, None]:
 
 def load_ca_cert() -> x509.Certificate:
     """
-    Load the CA's certificate from disk. Does not verify the certificate - use verify_ca_cert().
+    Load the CA's certificate from disk. Does not verify the certificate - use
+    verify_ca_cert().
     """
     with open(CA_CERT_FILE, "rb") as f:
         ca_cert_pem = f.read()
@@ -102,7 +112,7 @@ def load_ca_cert() -> x509.Certificate:
 def verify_ca_cert(ca_cert: x509.Certificate) -> bool:
     """
     Verify that the CA's certificate is valid.
-    
+
     Checks that:
     - The cert is self-signed
     - The cert has a supported public key type
@@ -111,7 +121,7 @@ def verify_ca_cert(ca_cert: x509.Certificate) -> bool:
     - The cert is a CA cert (can issue certificates)
     - The cert has an expected CN (issuer and subject)
     - The cert matches the private CA key on disk
-    
+
     If all these checks pass, returns True. Otherwise, returns False.
     """
     # Check if the CA certificate is self-signed and has a valid signature
@@ -121,32 +131,37 @@ def verify_ca_cert(ca_cert: x509.Certificate) -> bool:
         print("CA: The CA certificate is not self-signed.")
         return False
     except TypeError:
-        print("CA: The CA certificate does not have a supported public key type.")
+        print("CA: The CA certificate does not have a supported public "
+              "key type.")
         return False
     except InvalidSignature:
         print("CA: Couldn't verify the CA certificate's signature.")
         return False
     # Check if CA certificate is still valid
-    if datetime.datetime.now(datetime.timezone.utc) >= ca_cert.not_valid_after_utc:
+    now: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
+    if now >= ca_cert.not_valid_after_utc:
         print("CA: CA certificate has expired.")
         return False
-    if datetime.datetime.now(datetime.timezone.utc) <= ca_cert.not_valid_before_utc:
+    if now <= ca_cert.not_valid_before_utc:
         print("CA: CA certificate is not yet active.")
         return False
     # Check if CA can issue certificates
-    basic_constraints = ca_cert.extensions.get_extension_for_class(x509.BasicConstraints)
-    if basic_constraints.value.ca != True:
+    basic_constraints = \
+        ca_cert.extensions.get_extension_for_class(x509.BasicConstraints)
+    if basic_constraints.value.ca is not True:
         print("CA: CA cannot issue certificates.")
         return False
     # Check if CA has expected name (for issuer and subject both)
-    issuer_common_names = ca_cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
+    issuer_common_names = \
+        ca_cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)
     if len(issuer_common_names) != 1:
         print("CA: CA does not have exactly one issuer common name.")
         return False
     if issuer_common_names[0].value != CA_CN:
         print("CA: CA issuer common name was unexpected.")
         return False
-    subject_common_names = ca_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+    subject_common_names = \
+        ca_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     if len(subject_common_names) != 1:
         print("CA: CA does not have exactly one subject common name.")
         return False
@@ -154,7 +169,7 @@ def verify_ca_cert(ca_cert: x509.Certificate) -> bool:
         print("CA: CA subject common name was unexpected.")
         return False
     ca_key = load_ca_key()
-    if ca_key == None:
+    if ca_key is None:
         print("CA: Couldn't load CA private key for CA verification.")
         return None
     ca_public_key = ca_key.public_key()
@@ -174,38 +189,41 @@ def verify_ca_cert(ca_cert: x509.Certificate) -> bool:
 def verify_csr(csr: x509.CertificateSigningRequest) -> bool:
     """
     Verify if a CSR: has one CN.
-    
+
     If all these checks pass, returns True. Otherwise, returns False.
     """
-    subject_common_names = csr.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+    subject_common_names = \
+        csr.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     if len(subject_common_names) != 1:
         print("CA: CSR does not have exactly one subject common name.")
         return False
     return True
 
 
-def sign_csr(csr: x509.CertificateSigningRequest) -> Union[x509.Certificate, None]:
+def sign_csr(csr: x509.CertificateSigningRequest) -> Union[x509.Certificate,
+                                                           None]:
     """
     Create a certificate signed by the CA from a CSR.
-    
-    If a check fails, returns None. Otherwise, the signed certificate is returned.
+
+    If a check fails, returns None. Otherwise, the signed certificate is
+    returned.
     """
-    ### LOAD AND VERIFY CA CERTIFICATE
+    # LOAD AND VERIFY CA CERTIFICATE
     ca_cert = load_ca_cert()
     if not verify_ca_cert(ca_cert):
         print("CA: Couldn't verify CA certificate.")
         return None
-    
-    ### VERIFY CSR
+
+    # VERIFY CSR
     if not verify_csr(csr):
         return None
-    
+
     # Load the CA's private key to sign with
     ca_key = load_ca_key()
-    if ca_key == None:
+    if ca_key is None:
         print("CA: Couldn't load CA private key for signing.")
         return None
-    
+
     cert = x509.CertificateBuilder().subject_name(
         csr.subject
     ).issuer_name(
@@ -218,7 +236,8 @@ def sign_csr(csr: x509.CertificateSigningRequest) -> Union[x509.Certificate, Non
         datetime.datetime.now(datetime.timezone.utc)
     ).not_valid_after(
         # Have certificate be valid for 5 minutes
-        datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(minutes=5)
+        datetime.datetime.now(datetime.timezone.utc) +
+        datetime.timedelta(minutes=5)
     ).sign(ca_key, hashes.SHA256(), rsa_padding=padding.PKCS1v15())
     return cert
 
@@ -228,8 +247,9 @@ def validate_cert(cert: x509.Certificate, id: str) -> bool:
     Validates a certificate by:
     - Checking if it's signed by the CA (based on cert and key)
     - Checking if it's still valid (not expired and active)
-    - Checking if it has a valid identity and it matches the expected email (from the parameter)
-    
+    - Checking if it has a valid identity and it matches the expected email
+    (from the parameter)
+
     If all these checks pass, returns True. Otherwise, returns False.
     """
     ca_cert = load_ca_cert()
@@ -237,7 +257,7 @@ def validate_cert(cert: x509.Certificate, id: str) -> bool:
         print("CA: Couldn't verify CA certificate.")
         return False
     ca_key = load_ca_key()
-    if ca_key == None:
+    if ca_key is None:
         print("CA: Couldn't load CA private key for validation.")
         return False
     ca_public_key = ca_key.public_key()
@@ -262,20 +282,24 @@ def validate_cert(cert: x509.Certificate, id: str) -> bool:
     except InvalidSignature:
         print("CA: Couldn't verify the certificate's signature.")
         return False
-    if datetime.datetime.now(datetime.timezone.utc) >= cert.not_valid_after_utc:
+    now: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
+    if now >= cert.not_valid_after_utc:
         print("CA: Certificate has expired.")
         return False
-    if datetime.datetime.now(datetime.timezone.utc) <= cert.not_valid_before_utc:
+    if now <= cert.not_valid_before_utc:
         print("CA: Certificate is not yet active.")
         return False
-    subject_common_names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+    subject_common_names = \
+        cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
     if len(subject_common_names) != 1:
         print("CA: Certificate does not have exactly one subject common name.")
         return False
     if subject_common_names[0].value != id:
-        print("CA: Certificate does not belong to expected user (id unexpected).")
+        print("CA: Certificate does not belong to expected user "
+              "(id unexpected).")
         return False
     return True
+
 
 if __name__ == '__main__':
     gen_ca()

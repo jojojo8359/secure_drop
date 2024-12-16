@@ -11,7 +11,7 @@ def encrypt_contacts_file(data, key: str):
     """
     Encrypts the provided data with the provided hash, and writes it to the
     contacts file.
-    
+
     The data provided should be a dictionary or list, since it will be dumped
     by the json library to encode and encrypt.
     """
@@ -25,7 +25,7 @@ def decrypt_contacts_file(key: str) -> dict[str, str]:
     """
     Decrypts the contacts file with the provided hash, and returns a Python
     dictionary with the decrypted data.
-    
+
     If the file does not exist, an empty dictionary object will be returned.
     """
     if not os.path.exists(CONTACTS_FILE):
@@ -40,11 +40,12 @@ def decrypt_contacts_file(key: str) -> dict[str, str]:
 def add_contact(contact_hash: str, user_id: str) -> None:
     """
     Adds a contact to the list of contacts.
-    
+
     The contact hash is needed to encrypt and decrypt contact data with the
     current user's (now encrypted) credentials.
     """
-    contacts: dict = decrypt_contacts_file(contact_hash) if os.path.exists(CONTACTS_FILE) else {}
+    contacts: dict = decrypt_contacts_file(contact_hash) \
+        if os.path.exists(CONTACTS_FILE) else {}
     name = get_name()
     email = get_email()
     if id_hash(email) == user_id:
@@ -61,7 +62,7 @@ def add_contact(contact_hash: str, user_id: str) -> None:
 def list_contacts(contact_hash: str, user_id: str) -> None:
     """
     Lists the online contacts stored in the contacts file.
-    
+
     The contact hash is needed to decrypt contact data with the current user's
     (now encrypted) credentials.
     """
@@ -74,8 +75,10 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
         # run thread for 1 second to see online contacts
         get_mutual_contacts_list(user_id, received_list, [], 'ping')
 
-        # get responses from everyone, I will get their ID back if I am in their contact
-        # Go through my contacts, match IDs I get back against theirs, list them if matches
+        # get responses from everyone, I will get their ID back if I am in
+        # their contacts
+        # Go through my contacts, match IDs I get back against theirs, list
+        # them if matches
 
         output: str = ""
         for email, name in contacts.items():
@@ -93,6 +96,7 @@ def list_contacts(contact_hash: str, user_id: str) -> None:
 def get_contact_id(contact_email: str, contact_hash: str) -> str:
     # TODO: Add documentation
     contact_info = decrypt_contacts_file(contact_hash)
-    ret_val: str = id_hash(contact_email) if contact_email in contact_info else ''
+    ret_val: str = id_hash(contact_email) \
+        if contact_email in contact_info else ''
     del contact_info
     return ret_val

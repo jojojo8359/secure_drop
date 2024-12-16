@@ -32,7 +32,9 @@ def start() -> None:
 
         while last_input.last_input != 'exit':
             shell_stop_event = threading.Event()
-            shell_thread = threading.Thread(target=shell, args=(contact_hash, user_id, shell_stop_event))
+            shell_thread = threading.Thread(target=shell,
+                                            args=(contact_hash, user_id,
+                                                  shell_stop_event))
             shell_thread.start()
 
             while shell_thread.is_alive():
@@ -48,10 +50,12 @@ def start() -> None:
                     contact_name: str = ''
                     contact_email: str = ''
 
-                    contacts_list: dict[str, str] = decrypt_contacts_file(contact_hash)
+                    contacts_list: dict[str, str] = \
+                        decrypt_contacts_file(contact_hash)
                     for contact in contacts_list:
                         if received_id == id_hash(contact):
-                            udp_server_socket.sendto(user_id.encode('utf-8'), sender_address)
+                            udp_server_socket.sendto(user_id.encode('utf-8'),
+                                                     sender_address)
                             contact_email = contact
                             contact_name = contacts_list[contact]
                             if mode == 'send':
@@ -64,17 +68,20 @@ def start() -> None:
 
                     # user received a file transfer request:
                     if contact_name != '' and mode == 'send':
-                        input_prompt = \
-                            f"\n  Contact '{contact_name} < {contact_email} >' is sending a file. Accept (y/n)? "
+                        input_prompt = f"\n  Contact '{contact_name} < " \
+                            f"{contact_email} >' is sending a file. Accept " \
+                            f"(y/n)? "
                         del contact_name, contact_email
                         print(input_prompt, end='')
                         shell_stop_event.set()
                         shell_thread.join()
                         if get_yes_or_no(input_prompt, last_input.last_input):
-                            # broadcast a signal saying they do accept file transfer
-                            receive_file(user_id, received_id, sender_address[0])
+                            # broadcast a signal saying they do accept file
+                            # transfer
+                            receive_file(user_id, received_id,
+                                         sender_address[0])
                         else:
-                            # broadcast a signal saying they do not accept file transfer
+                            # wait for timeout to close server, do nothing
                             pass
                         del input_prompt
 
