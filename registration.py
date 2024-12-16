@@ -8,7 +8,9 @@ from util import get_name, get_email, get_password_register, get_password
 
 
 class WrongInfo(Exception):
-    # TODO: Add documentation
+    """
+    A custom Exception class to be raised when invalid credentials are entered.
+    """
     pass
 
 

@@ -12,7 +12,9 @@ from cryptography import x509
 
 
 def server(my_id: str, peer_id: str, filepath: str) -> None:
-    # TODO: Add documentation
+    """
+    Opens a TCP server to send a file securely over SSL.
+    """
     if not os.path.exists(filepath):
         print("File doesn't exist, exiting...")
         return
@@ -20,7 +22,7 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
     my_ip = get_local_ip()
 
     signing_key = ec_gen_private_key()
-    save_private_key(CLIENT_KEY_FILE, signing_key)
+    save_private_key(signing_key, CLIENT_KEY_FILE)
     csr = build_csr(signing_key, my_id)
     cert = sign_csr(csr)
     del csr
@@ -32,7 +34,7 @@ def server(my_id: str, peer_id: str, filepath: str) -> None:
         print("Couldn't validate certificate for server")
         del cert
         return
-    save_cert(CLIENT_CERT_FILE, cert)
+    save_cert(cert, CLIENT_CERT_FILE)
 
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     context.verify_mode = ssl.CERT_REQUIRED

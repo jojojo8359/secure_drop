@@ -11,9 +11,11 @@ from cryptography import x509
 
 
 def client(my_id: str, peer_id: str, peer_address):
-    # TODO: Add documentation
+    """
+    Opens a TCP client to receive a file securely over SSL.
+    """
     signing_key = ec_gen_private_key()
-    save_private_key(CLIENT_KEY_FILE, signing_key)
+    save_private_key(signing_key, CLIENT_KEY_FILE)
     csr = build_csr(signing_key, my_id)
     cert = sign_csr(csr)
     del csr
@@ -25,7 +27,7 @@ def client(my_id: str, peer_id: str, peer_address):
         print("Couldn't validate certificate for client")
         del cert
         return
-    save_cert(CLIENT_CERT_FILE, cert)
+    save_cert(cert, CLIENT_CERT_FILE)
 
     context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH,
                                          cafile=CA_CERT_FILE)

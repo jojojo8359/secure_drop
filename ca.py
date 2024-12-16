@@ -10,9 +10,11 @@ import datetime
 CA_CN = "g4_secure_drop"
 
 
-def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey,
-                                               rsa.RSAPrivateKey]):
-    # TODO: Add documentation
+def save_private_key(key: Union[ec.EllipticCurvePrivateKey,
+                                rsa.RSAPrivateKey], filename: str):
+    """
+    Save an EC or RSA private key to disk, given a filename.
+    """
     with open(filename, "wb") as f:
         f.write(key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -21,8 +23,10 @@ def save_private_key(filename: str, key: Union[ec.EllipticCurvePrivateKey,
         ))
 
 
-def save_cert(filename: str, cert: x509.Certificate):
-    # TODO: Add documentation
+def save_cert(cert: x509.Certificate, filename: str):
+    """
+    Save an x509 Certificate to disk, given a filename.
+    """
     with open(filename, "wb") as f:
         f.write(cert.public_bytes(serialization.Encoding.PEM))
 
@@ -34,7 +38,7 @@ def gen_ca():
     The certificate is valid for 30 days.
     """
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    save_private_key(CA_KEY_FILE, key)
+    save_private_key(key, CA_KEY_FILE)
     # Since we're self-signing, subject = issuer
     subject = issuer = x509.Name([
         # The only field we really care about here is a unique CA name
@@ -66,7 +70,7 @@ def gen_ca():
         x509.BasicConstraints(ca=True, path_length=None),
         critical=True
     ).sign(key, hashes.SHA256(), rsa_padding=padding.PKCS1v15())
-    save_cert(CA_CERT_FILE, cert)
+    save_cert(cert, CA_CERT_FILE)
 
 
 def build_csr(private_key: ec.EllipticCurvePrivateKey,

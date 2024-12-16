@@ -49,7 +49,14 @@ def broadcast_id(id_: str, received_list: list[str], addr_list: list,
 
 def get_mutual_contacts_list(id_: str, received_list: list[str],
                              addr_list: list, mode: str) -> None:
-    # TODO: Add documentation
+    """
+    Gets a list of mutual contacts between the current user and all other
+    online users by utilizing the broadcast_id() method.
+
+    id_ is the current user's id. After running, received_list will contain
+    all mutual contact ids on the network. If mode is 'look', addr_list will
+    contain the IP addresses of the mutual contacts in received_list.
+    """
     stop_event = threading.Event()
     thread = threading.Thread(target=broadcast_id,
                               args=(id_, received_list, addr_list, stop_event,
@@ -62,7 +69,10 @@ def get_mutual_contacts_list(id_: str, received_list: list[str],
 
 def send_file(my_id: str, target_id: str, target_email: str, file_path: str) \
         -> None:
-    # TODO: Add documentation
+    """
+    Send a file (at file_path) to a user with the target_id present on the
+    network. target_email is used for display purposes only.
+    """
     id_list = []
     addr_list = []
     get_mutual_contacts_list(my_id, id_list, addr_list, 'look')
@@ -84,5 +94,8 @@ def send_file(my_id: str, target_id: str, target_email: str, file_path: str) \
 
 
 def receive_file(my_id: str, target_id: str, address) -> None:
-    # TODO: Add documentation
+    """
+    Receive a file from target_id, who should have a TCP server open at
+    address.
+    """
     client(my_id, target_id, address)
