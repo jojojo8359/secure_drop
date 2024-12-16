@@ -2,6 +2,9 @@
 
 A secure peer-to-peer file transfer program.
 
+> [!WARNING]
+> Although secure_drop is definitely security-oriented, it may not be perfectly secure - use at your own risk!
+
 ## Setup
 
 This project was tested using Python 3.9.7+.
