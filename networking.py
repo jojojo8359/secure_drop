@@ -1,8 +1,7 @@
 import socket
 import threading
 import time
-from tcp_server import server
-from tcp_client import client
+from tcp import server, client
 
 
 SERVER_IP = "0.0.0.0"
